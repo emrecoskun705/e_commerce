@@ -32,9 +32,12 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
 
-
+    #mptt 
+    'mptt',
+    
     #my app
-    'core'
+    'core',
+    
     
 ]
 
@@ -128,11 +131,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = 'static/'
-MEDIA_URL = 'media/'
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static_in_env')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-
+SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'
