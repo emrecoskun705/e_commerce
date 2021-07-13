@@ -10,9 +10,9 @@ class Product(models.Model):
     title = models.CharField(max_length=120)
     price = models.FloatField()
     discount_price = models.FloatField(blank=True, null=True)
-    slug = models.SlugField()
+    slug = models.SlugField(null=True)
     description = models.TextField(max_length=1000)
-
+    image = models.ImageField(upload_to='images/')
 
     category = models.ForeignKey(
         'Category',

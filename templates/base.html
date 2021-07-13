@@ -16,40 +16,12 @@
     <link href="{% static 'css/mdb.min.css' %}" rel="stylesheet">
     <!-- Your custom styles (optional) -->
     <link href="{% static 'css/style.min.css' %}" rel="stylesheet">
-      <style type="text/css">
-    html,
-    body,
-    header,
-    .carousel {
-      height: 60vh;
-    }
 
-    @media (max-width: 740px) {
-
-      html,
-      body,
-      header,
-      .carousel {
-        height: 100vh;
-      }
-    }
-
-    @media (min-width: 800px) and (max-width: 850px) {
-
-      html,
-      body,
-      header,
-      .carousel {
-        height: 100vh;
-      }
-    }
-
-  </style>
 </head>
 {% include "includes/navbar.html" %}
 <body>
   <main>
-    <div class="container">
+    <div class="container mt-5">
       {% block content %}
       
       {% endblock content %}

@@ -34,7 +34,9 @@ INSTALLED_APPS = [
 
     #mptt 
     'mptt',
-    
+    #crispy forms
+    'crispy_forms',
+
     #my app
     'core',
     
@@ -139,3 +141,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'
+
+#Settings for bootstrap4 crispy templates
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+#Django-allauth configiration
+ACCOUNT_EMAIL_VERIFICATION = None
