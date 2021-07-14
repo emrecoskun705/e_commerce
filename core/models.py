@@ -2,6 +2,8 @@ from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 from django.utils.text import slugify
 from django.conf import settings
+from django.urls import reverse
+from django.db.models import Sum
 
 class Product(models.Model):
     """
@@ -26,7 +28,18 @@ class Product(models.Model):
         super(Product, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return self.slug
+        """
+        Gets absolute url for product, for example
+        .../product/slugname/
+        """
+        return reverse("core:product-detail", kwargs={
+            'slug': self.slug
+        })
+
+    def get_product_cart_url(self):
+        return reverse('core:add-to-cart', kwargs={
+            'slug': self.slug
+        })
 
 class Category(MPTTModel):
     """
@@ -80,7 +93,7 @@ class OrderProduct(models.Model):
     is_ordered = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'{self.quantity} x {self.product.title}'
+        return f"{str(self.quantity)} x {self.product.title}"
 
     def get_total_item_price(self):
         return self.quantity * self.product.price
@@ -112,4 +125,9 @@ class Order(models.Model):
     # order name is username
     def __str__(self):
         return self.user.username
-    
+
+    def get_total_order_price(self):
+        sum = 0
+        for item in self.items.all():
+            sum += item.get_final_price()
+        return sum
