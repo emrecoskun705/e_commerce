@@ -13,6 +13,7 @@ class Product(models.Model):
     slug = models.SlugField(null=True)
     description = models.TextField(max_length=1000)
     image = models.ImageField(upload_to='images/')
+    stock = models.IntegerField()
 
     category = models.ForeignKey(
         'Category',

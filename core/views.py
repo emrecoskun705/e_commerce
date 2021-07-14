@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView
+from django.views.generic.detail import DetailView
 from .models import Product, Category
 
 
@@ -15,4 +16,9 @@ class HomeView(ListView):
         context = super().get_context_data(**kwargs)
         context['categories'] = Category.objects.filter(level__lt=1)
         return context
+
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'product_detail.html'
+
 

@@ -94,9 +94,10 @@
 
                 <!--Card image-->
                 <div class="view overlay">
+                  <a href="{{ item.get_absolute_url }}">
                     <img src="{{ item.image.url }}" class="card-img-top text-center mx-auto"
-                      alt="" style=" width: {{item.image|handle_width}}px; height: 200px" >
-                  
+                      alt="" style=" width: {% handle_width item.image 200 %}px; height: 200px" >
+                  </a>
                   
                 </div>
                 <!--Card image-->
@@ -104,12 +105,12 @@
                 <!--Card content-->
                 <div class="card-body text-center">
                   <!--Category & Title-->
-                  <a href="" class="grey-text">
+                  <a href="{{ item.get_absolute_url }}" class="grey-text">
                     <h5>{{ item.category }}</h5>
                   </a>
                   <h5>
                     <strong>
-                      <a href="" class="dark-grey-text">{{ item.title }}
+                      <a href="{{ item.get_absolute_url }}" class="dark-grey-text">{{ item.title }}
                         <span class="badge badge-pill danger-color">NEW</span>
                       </a>
                     </strong>
