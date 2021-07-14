@@ -18,6 +18,7 @@ class HomeView(ListView):
         return context
 
 class ProductDetailView(DetailView):
+    """Product detail view, it finds prdocut by slug in core.urls"""
     model = Product
     template_name = 'product_detail.html'
 
