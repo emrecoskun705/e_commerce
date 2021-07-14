@@ -1,10 +1,10 @@
   <!-- Navbar -->
-  <nav class="navbar fixed-top navbar-expand-lg navbar-light white scrolling-navbar">
+  <nav class="navbar navbar-expand-lg navbar-light white scrolling-navbar">
     <div class="container">
 
       <!-- Brand -->
-      <a class="navbar-brand waves-effect" href="https://mdbootstrap.com/docs/jquery/" target="_blank">
-        <strong class="blue-text">MDB</strong>
+      <a class="navbar-brand waves-effect" href="{% url 'core:home' %}">
+        <strong class="blue-text">Welcome</strong>
       </a>
 
       <!-- Collapse -->
@@ -17,24 +17,23 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
 
         <!-- Left -->
-        <ul class="navbar-nav mr-auto">
+        <!--<ul class="navbar-nav mr-auto">
           <li class="nav-item active">
-            <a class="nav-link waves-effect" href="#">Home
+            <a class="nav-link waves-effect" href="{% url 'core:home' %}">Home
               <span class="sr-only">(current)</span>
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link waves-effect" href="https://mdbootstrap.com/docs/jquery/" target="_blank">About MDB</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link waves-effect" href="https://mdbootstrap.com/docs/jquery/getting-started/download/"
-              target="_blank">Free download</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link waves-effect" href="https://mdbootstrap.com/education/bootstrap/" target="_blank">Free
-              tutorials</a>
-          </li>
-        </ul>
+        </ul>-->
+
+        <form class="form-inline my-2 my-lg-0 ml-auto mr-auto">
+        
+          <input type="search" id="form1" class="form-control" placeholder="Search" style="width: 400px"/>
+          
+          <button type="button" class="btn btn-primary btn-sm">
+            <i class="fas fa-search" ></i>
+          </button>
+          
+        </form>
 
         <!-- Right -->
         <ul class="navbar-nav nav-flex-icons">
@@ -54,12 +53,12 @@
           {% else %}
             <li class="nav-item">
               <a class="nav-link waves-effect" href="{% url 'account_login' %}">
-                <span class="clearfix d-none d-sm-inline-block"> Login </span>
+                <span class="clearfix d-sm-inline-block"> Login </span>
               </a>
             </li>
             <li class="nav-item">
               <a class="nav-link waves-effect" href="{% url 'account_signup' %}">
-                <span class="clearfix d-none d-sm-inline-block"> Signup </span>
+                <span class="clearfix d-sm-inline-block"> Signup </span>
               </a>
             </li>
           {% endif %}

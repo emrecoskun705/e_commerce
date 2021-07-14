@@ -19,9 +19,12 @@
 
 </head>
 {% include "includes/navbar.html" %}
+{% block extra_navbar %}
+
+{% endblock extra_navbar %}
 <body>
   <main>
-    <div class="container mt-5">
+    <div class="container mt-2">
       {% block content %}
       
       {% endblock content %}

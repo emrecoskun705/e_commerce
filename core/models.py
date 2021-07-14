@@ -50,12 +50,13 @@ class Category(MPTTModel):
     
     
     def __str__(self):
-        full_path = [self.name]
+        return self.name
+        """ full_path = [self.name]
         k = self.parent
         while k is not None:
             full_path.append(k.name)
             k = k.parent
-        return ' -> '.join(full_path[::-1])
+        return ' -> '.join(full_path[::-1]) """
 
     def get_name(self):
         return self.name

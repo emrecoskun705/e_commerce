@@ -1,13 +1,18 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView
-from .models import Product
+from .models import Product, Category
 
-# Create your views here.
+
 class HomeView(ListView):
     model = Product
     paginate_by = 10
     template_name = 'index.html'
     ordering = ['-id']
 
-#def homeView(request):
-#    products = Product.objects.all()
+
+    #This part filters categories by at the top of every trees which are roots
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.filter(level__lt=1)
+        return context
+
