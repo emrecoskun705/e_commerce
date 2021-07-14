@@ -93,4 +93,23 @@ class OrderProduct(models.Model):
             return self.get_total_discount_item_price()
         return self.get_total_item_price()
 
+class Order(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    items = models.ManyToManyField(OrderProduct)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    order_date = models.DateTimeField()
+    is_ordered = models.BooleanField(default=False)
+    ####
+    #### ADD ADDRESS METHOD
+    ###
+    is_refund_requested = models.BooleanField(default=False)
+    is_refund_granted = models.BooleanField(default=False)
+
+    is_delivered = models.BooleanField(default=False)
+    is_received = models.BooleanField(default=False)
+
+
+    # order name is username
+    def __str__(self):
+        return self.user.username
     
