@@ -4,7 +4,9 @@ from mptt.admin import MPTTModelAdmin
 from .models import (
     Product,
     ProductImage,
-    Category
+    Category,
+    OrderProduct,
+    Order
 )
 
 
@@ -23,3 +25,7 @@ admin.site.register(ProductImage)
 
 """ CATEGORY """
 admin.site.register(Category, MPTTModelAdmin)
+
+admin.site.register(OrderProduct)
+
+admin.site.register(Order)
