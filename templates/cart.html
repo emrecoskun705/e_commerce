@@ -46,7 +46,7 @@
 
           <h2>Total: {{order.get_total_order_price}}</h2>
           {% if request.user.is_authenticated %}
-              <button class="btn btn-primary btn-block">Buy</button>
+              <a href="{% url 'core:checkout' %}"class="btn btn-primary btn-block">Buy</a>
           {% else %}
               <a href="login.php" class="btn btn-primary btn-block">Login</a>   
           {% endif %}                                     

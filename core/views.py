@@ -1,12 +1,15 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import request
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.generic import ListView
 from django.views.generic.base import View
 from django.views.generic.detail import DetailView
 from .models import Order, Product, Category, OrderProduct
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.utils import timezone
+from django.urls import reverse
 
 class HomeView(ListView):
     model = Product
@@ -122,3 +125,12 @@ def remove_one_product(request, slug):
     else:
         messages.info(request, "Your cart is empty")
         return redirect("core:product-detail", slug=slug)
+
+class CheckoutView(LoginRequiredMixin, View):
+    """
+    Now it is only for visuality,
+    TODO: Checkout part will be in here
+    """
+    login_url = '/accounts/login/'
+    def get(self, *args, **kwargs):
+        return render(self.request, 'checkout.html')
