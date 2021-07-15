@@ -56,6 +56,9 @@ def add_to_cart(request, slug):
         order = order_qs[0]
         #check for order item
         if order.items.filter(product__slug=product.slug).exists():
+            if order_product.quantity+1 > order_product.product.stock:
+                messages.warning(request, 'Product stock is not eneough')
+                return redirect('core:cart')
             order_product.quantity += 1
             order_product.save()
             messages.info(request, "Prodcut quantity updated.")
@@ -97,3 +100,25 @@ def remove_product_from_cart(request, slug):
     else:
         messages.info(request, "Order isn't created")
         return product.get_absolute_url()
+
+@login_required
+def remove_one_product(request, slug):
+    product = get_object_or_404(Product, slug=slug)
+    order_qs = Order.objects.filter(user=request.user, is_ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        if order.items.filter(product__slug=product.slug).exists():
+            order_product = OrderProduct.objects.filter(product=product,user=request.user,is_ordered=False)[0]
+            if order_product.quantity > 1:
+                order_product.quantity -= 1
+                order_product.save()
+            else:
+                order.items.remove(order_product)
+            messages.info(request, "Product has been updated.")
+            return redirect("core:cart")
+        else:
+            messages.info(request, "Product is not in your cart.")
+            return redirect("core:product-detail", slug=slug)
+    else:
+        messages.info(request, "Your cart is empty")
+        return redirect("core:product-detail", slug=slug)

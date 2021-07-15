@@ -22,7 +22,11 @@
             <td style="text-align: center" ><img width="{% handle_width orderProduct.product.image 80 %}" height="80px" src="{{orderProduct.product.image.url}}" alt="asd"></td>
             <td>{{orderProduct.product.title}}</td>
             <td>{{orderProduct.product.price}}$</td>
-            <td>{{orderProduct.quantity}}</td>
+            <td>
+              <a href="{{ orderProduct.product.get_remove_one_product_url }}"><i class="fas fa-minus mr-2"></i></a>
+              {{orderProduct.quantity}}
+              <a href="{{ orderProduct.product.get_product_cart_url }}"><i class="fas fa-plus ml-2"></i></a>
+            </td>
             <td><a href="{{ orderProduct.product.get_remove_product_cart_url }}"><i class="fas fa-trash"></i></a></td>
           </tr> 
           {% endfor %}

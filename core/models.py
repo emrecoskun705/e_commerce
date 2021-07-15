@@ -40,6 +40,11 @@ class Product(models.Model):
         return reverse('core:add-to-cart', kwargs={
             'slug': self.slug
         })
+    
+    def get_remove_one_product_url(self):
+        return reverse('core:remove-one-product', kwargs={
+            'slug': self.slug
+        })
 
     def get_remove_product_cart_url(self):
         return reverse('core:remove-product', kwargs={
