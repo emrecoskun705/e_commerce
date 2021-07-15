@@ -10,7 +10,7 @@ from django.utils import timezone
 
 class HomeView(ListView):
     model = Product
-    paginate_by = 10
+    paginate_by = 20
     template_name = 'index.html'
     ordering = ['-id']
 
