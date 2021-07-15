@@ -28,15 +28,21 @@ class ProductDetailView(DetailView):
 
 class CartView(View):
     def get(self, *args, **kwargs):
-        try:
-            order = Order.objects.get(user=self.request.user, is_ordered=False)
-            context = {
-                'order': order
-            }
+        # if user is authenticated show product items
+        if self.request.user.is_authenticated:
+            try:
+                order = Order.objects.get(user=self.request.user, is_ordered=False)
+                context = {
+                    'order': order
+                }
+                return render(self.request, 'cart.html', context)
+            except ObjectDoesNotExist:
+                messages.warning(self.request, 'No products in here')
+                return redirect('/')
+        else:
+            # if user is not authenticated show empty cart
+            context = {}
             return render(self.request, 'cart.html', context)
-        except ObjectDoesNotExist:
-            messages.warning(self.request, 'No products in here')
-            return redirect('/')
 
 @login_required
 def add_to_cart(request, slug):
@@ -66,3 +72,28 @@ def add_to_cart(request, slug):
         messages.info(request, 'Product was added to your cart')
         return redirect('core:cart')
 
+@login_required
+def remove_product_from_cart(request, slug):
+    """
+     1. find the product
+     2. find orderProduct according to user and product
+     3. Locate the order for orderProduct
+     4. Remove it from order
+    """
+    product = get_object_or_404(Product, slug=slug)
+    order_qs = Order.objects.filter(user=request.user, is_ordered=False)
+
+    if order_qs.exists():
+        order = order_qs[0]
+        if order.items.filter(product__slug=product.slug).exists():
+            order_product = OrderProduct.objects.filter(product=product, user=request.user, is_ordered=False)[0]
+            order.items.remove(order_product)
+            order_product.delete()
+            messages.info(request, 'Product has been removed')
+            return redirect('core:cart')
+        else:
+            messages.info(request, "This item is not in your cart")
+            return redirect('core:product-detail', slug=slug)
+    else:
+        messages.info(request, "Order isn't created")
+        return product.get_absolute_url()

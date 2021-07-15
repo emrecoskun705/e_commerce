@@ -4,51 +4,72 @@
 
 {% block content %}
 <div class="row">
-	<div class="col-md-8 col-sm-12">
-		<table class="table">
-		<thead>
-		<tr>
-			<th scope="col">Product Image</th>            
-			<th scope="col">Product Name</th>
-			<th scope="col">Product Price</th>
-			<th scope="col">Quantity</th>  
-			<th scope="col">Cancel</th>           
-		</tr>
-		</thead>
-			<tbody id="cartTable">
-				{% for orderProduct in order.items.all %}
-				<tr>
-					<td style="text-align: center" ><img width="{% handle_width orderProduct.product.image 80 %}" height="80px" src="{{orderProduct.product.image.url}}" alt="asd"></td>
-					<td>{{orderProduct.product.title}}</td>
-					<td>{{orderProduct.product.price}}$</td>
-					<td>{{orderProduct.quantity}}</td>
-					<td><a href=""><i class="fas fa-trash"></i></a></td>
-				</tr> 
-				{% endfor %}
-												
-			</tbody>
-			
-		</table>
-		
-	</div>
-	<div class="col-md-4 col-sm-4">
-		<div class="card" style="width: 18rem;">
-			<div class="card-body">
-				<h3 class="card-title">Total price:</h3>
-				{% for orderProduct in order.items.all  %}
-					<h5 class="card-text">{{orderProduct.product.price}} x {{orderProduct.quantity}} = {{orderProduct.get_final_price}}</h5>
-				{% endfor %}
+  {% if request.user.is_authenticated %}
+    <div class="col-md-8 col-sm-12">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Product Image</th>            
+            <th scope="col">Product Name</th>
+            <th scope="col">Product Price</th>
+            <th scope="col">Quantity</th>  
+            <th scope="col">Cancel</th>           
+          </tr>
+        </thead>
+        <tbody id="cartTable">
+          {% for orderProduct in order.items.all %}
+          <tr>
+            <td style="text-align: center" ><img width="{% handle_width orderProduct.product.image 80 %}" height="80px" src="{{orderProduct.product.image.url}}" alt="asd"></td>
+            <td>{{orderProduct.product.title}}</td>
+            <td>{{orderProduct.product.price}}$</td>
+            <td>{{orderProduct.quantity}}</td>
+            <td><a href="{{ orderProduct.product.get_remove_product_cart_url }}"><i class="fas fa-trash"></i></a></td>
+          </tr> 
+          {% endfor %}
+                          
+        </tbody>
+        
+      </table>
+      
+    </div>
+    <div class="col-md-4 col-sm-4">
+      <div class="card" style="width: 18rem;">
+        <div class="card-body">
+          <h3 class="card-title">Total price:</h3>
+          {% for orderProduct in order.items.all  %}
+            <h5 class="card-text">{{orderProduct.product.price}} x {{orderProduct.quantity}} = {{orderProduct.get_final_price}}</h5>
+          {% endfor %}
 
-				<h2>Total: {{order.get_total_order_price}}</h2>
-				{% if request.user.is_authenticated %}
-						<button class="btn btn-primary btn-block">Buy</button>
-				{% else %}
-						<a href="login.php" class="btn btn-primary btn-block">Login</a>   
-				{% endif %}                                     
-					<a href="/" class="btn btn-secondary btn-block mt-1">Continue Shopping</a>
-			</div>
-		</div>
-	</div>
+          <h2>Total: {{order.get_total_order_price}}</h2>
+          {% if request.user.is_authenticated %}
+              <button class="btn btn-primary btn-block">Buy</button>
+          {% else %}
+              <a href="login.php" class="btn btn-primary btn-block">Login</a>   
+          {% endif %}                                     
+            <a href="/" class="btn btn-secondary btn-block mt-1">Continue Shopping</a>
+        </div>
+      </div>
+    </div>  
+  {% else %}
+    <div class="container-fluid mt-100">
+      <div class="row">
+          <div class="col-md-12">
+              <div class="card">
+                  <div class="card-header">
+                      <h5>Cart</h5>
+                  </div>
+                  <div class="card-body cart">
+                      <div class="col-sm-12 empty-cart-cls text-center"><i class="fas fa-shopping-cart fa-5x"></i>
+                          <h3><strong>Your Cart is Empty</strong></h3>
+                          <h4>Please log in to add products to your cart.</h4> <a href="/" class="btn btn-primary cart-btn-transform m-3" data-abc="true">continue shopping</a>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+    </div>
+  {% endif %}
+
 </div>
 
 {% endblock content %}

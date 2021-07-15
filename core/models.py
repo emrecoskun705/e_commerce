@@ -41,6 +41,11 @@ class Product(models.Model):
             'slug': self.slug
         })
 
+    def get_remove_product_cart_url(self):
+        return reverse('core:remove-product', kwargs={
+            'slug': self.slug
+        })
+
 class Category(MPTTModel):
     """
        MPTT is a technique for storing hierarchical data in a database. 
