@@ -6,7 +6,8 @@ from .models import (
     ProductImage,
     Category,
     OrderProduct,
-    Order
+    Order,
+    Address
 )
 
 
@@ -29,3 +30,5 @@ admin.site.register(Category, MPTTModelAdmin)
 admin.site.register(OrderProduct)
 
 admin.site.register(Order)
+
+admin.site.register(Address)

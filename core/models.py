@@ -1,9 +1,26 @@
 from django.db import models
+from django.http import request
 from mptt.models import MPTTModel, TreeForeignKey
 from django.utils.text import slugify
 from django.conf import settings
 from django.urls import reverse
 from django.db.models import Sum
+
+
+class Address(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='addresses')
+    address_title = models.CharField(max_length=50)
+    country = models.CharField(max_length=100)
+    province = models.CharField(max_length=100)
+    zip = models.CharField(max_length=50)
+    detail = models.CharField(max_length=600)
+
+    def __str__(self):
+        return self.address_title
+    
+    class Meta:
+        verbose_name_plural = 'Addresses'
+    
 
 class Product(models.Model):
     """
@@ -116,21 +133,35 @@ class OrderProduct(models.Model):
             return self.get_total_discount_item_price()
         return self.get_total_item_price()
 
+class Coupon(models.Model):
+    key = models.CharField(max_length=16)
+    amount = models.FloatField()
+
+    def __str__(self):
+        return self.key
+
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     items = models.ManyToManyField(OrderProduct)
     timestamp = models.DateTimeField(auto_now_add=True)
     order_date = models.DateTimeField()
     is_ordered = models.BooleanField(default=False)
-    ####
-    #### ADD ADDRESS METHOD
-    ###
+    
+    shipping_address = models.ForeignKey(Address, related_name='shipping_address', on_delete=models.SET_NULL,
+        blank=True, null=True)
+    billing_address = models.ForeignKey(Address, related_name='billing_address', on_delete=models.SET_NULL,
+        blank=True, null=True)
+
     is_refund_requested = models.BooleanField(default=False)
     is_refund_granted = models.BooleanField(default=False)
 
     is_delivered = models.BooleanField(default=False)
     is_received = models.BooleanField(default=False)
 
+    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, blank=True, null=True)
+
+    first_name = models.CharField(max_length=50, blank=True, null=True)
+    last_name = models.CharField(max_length=50, blank=True, null=True)
 
     # order name is username
     def __str__(self):

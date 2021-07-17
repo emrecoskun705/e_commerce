@@ -12,5 +12,8 @@ def product_count_user(user):
     if not user.is_authenticated:
         return 0
     else:
-        order = Order.objects.filter(user=user, is_ordered=False)[0]
-        return order.items.count()
+        if Order.objects.filter(user=user, is_ordered=False):
+            order = Order.objects.filter(user=user, is_ordered=False)[0]
+            return order.items.count()
+        else: return 0
+
