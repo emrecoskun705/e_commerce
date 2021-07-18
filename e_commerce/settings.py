@@ -115,6 +115,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# E-mail console backend for developing purpose
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -147,3 +150,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 #Django-allauth configiration
 ACCOUNT_EMAIL_VERIFICATION = None
+
+#Stripe configiration
+STRIPE_PUBLIC_KEY = config('STRIPE_TEST_PUBLIC_KEY')
+STRIPE_SECRET_KEY = config('STRIPE_TEST_SECRET_KEY')
+STRIPE_WEBHOOK_SECRET_KEY = config('STRIPE_WEBHOOK_SECRET_KEY')

@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 {% load cart_template_tags %}
 
+{% block head_section %}
+<script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+{% endblock head_section %}
+
 {% block content %}
 <!-- Heading -->
 <h2 class="my-5 h2 text-center">Checkout form</h2>
@@ -15,7 +20,7 @@
     <div class="card">
 
         <!--Card content-->
-        <form method="POST" action="{% url 'core:checkout' %}" class="card-body">
+        <form method="POST" class="card-body">
           {% csrf_token %}
 
 
@@ -175,7 +180,10 @@
 
     <!-- Cart -->
     <ul class="list-group mb-3 z-depth-1">
+    <section>
       {% for item in order.items.all %}
+      <div class="product">
+      
         <li class="list-group-item d-flex justify-content-between lh-condensed">
           <div>
             <h6 class="my-0">{{ item.product.title }}</h6>
@@ -183,8 +191,9 @@
           </div>
           <span class="text-muted">${{ item.get_final_price }}</span>
         </li>
+      </div>
       {% endfor %}
-
+    </section>
       <li class="list-group-item d-flex justify-content-between bg-light">
         <div class="text-success">
           <h6 class="my-0">Promo code</h6>

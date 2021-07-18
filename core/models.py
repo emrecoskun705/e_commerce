@@ -1,8 +1,9 @@
 from django.db import models
+from django.db.models.signals import post_save
 from django.http import request
 from mptt.models import MPTTModel, TreeForeignKey
 from django.utils.text import slugify
-from django.conf import settings
+from django.conf import Settings, settings
 from django.urls import reverse
 from django.db.models import Sum
 
@@ -143,6 +144,7 @@ class Coupon(models.Model):
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     items = models.ManyToManyField(OrderProduct)
+    ref_code = models.CharField(max_length=20, blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     order_date = models.DateTimeField()
     is_ordered = models.BooleanField(default=False)
@@ -158,6 +160,8 @@ class Order(models.Model):
     is_delivered = models.BooleanField(default=False)
     is_received = models.BooleanField(default=False)
 
+    payment = models.ForeignKey('Payment', on_delete=models.SET_NULL, blank=True, null=True)
+
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, blank=True, null=True)
 
     first_name = models.CharField(max_length=50, blank=True, null=True)
@@ -172,3 +176,38 @@ class Order(models.Model):
         for item in self.items.all():
             sum += item.get_final_price()
         return sum
+
+class Refund(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    reason = models.TextField()
+    accepted = models.BooleanField(default=False)
+    email = models.EmailField()
+
+    def __str__(self):
+        return str(self.pk)
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    stripe_customer_id = models.CharField(max_length=50, blank=True, null=True)
+    one_click_purchasing = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.username
+
+class Payment(models.Model):
+    stripe_payment_intent = models.CharField(max_length=50)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
+    amount = models.FloatField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username
+
+def userprofile_receiver(sender, instance, created, *args, **kwargs):
+    if created:
+        userprofile = UserProfile.objects.create(user=instance)
+
+"""
+This receiver will create Userprofile for user when a new user is created
+"""
+post_save.connect(userprofile_receiver, sender=settings.AUTH_USER_MODEL)

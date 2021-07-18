@@ -4,10 +4,13 @@ from .views import (
     ProductDetailView,
     CartView,
     CheckoutView,
-    PaymentView,
+    SuccessView,
+    CancelView,
+    #PaymentView,
     add_to_cart,
     remove_product_from_cart,
-    remove_one_product
+    remove_one_product,
+    stripe_webhook
 )
 
 app_name = 'core'
@@ -20,5 +23,8 @@ urlpatterns = [
     path('remove-product/<slug:slug>/', remove_product_from_cart, name='remove-product'),
     path('remove-one-product/<slug:slug>/', remove_one_product, name='remove-one-product'),
     path('checkout/', CheckoutView.as_view(), name='checkout'),
-    path('payment/', PaymentView.as_view(), name='payment'),
+    path('webhooks/stripe/', stripe_webhook, name='stripe-webhook'),
+    path('success/', SuccessView.as_view(), name='success'),
+    path('cancel/', CancelView.as_view(), name='cancel'),
+    #path('payment/', PaymentView.as_view(), name='payment'),
 ]

@@ -7,7 +7,10 @@ from .models import (
     Category,
     OrderProduct,
     Order,
-    Address
+    Address,
+    Payment,
+    UserProfile,
+    Refund
 )
 
 
@@ -32,3 +35,9 @@ admin.site.register(OrderProduct)
 admin.site.register(Order)
 
 admin.site.register(Address)
+
+admin.site.register(Payment)
+
+admin.site.register(UserProfile)
+
+admin.site.register(Refund)

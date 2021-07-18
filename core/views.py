@@ -1,16 +1,29 @@
+from django.urls.conf import path
 from core.forms import CheckoutForm, CouponForm
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import request
+from django.core.mail import send_mail
+from django.http import request, JsonResponse, HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.generic import ListView
-from django.views.generic.base import View
+from django.views.generic.base import TemplateView, View
 from django.views.generic.detail import DetailView
-from .models import Order, Product, Category, OrderProduct, Address
+from django.views.decorators.csrf import csrf_exempt
+from .models import Order, Payment, Product, Category, OrderProduct, Address
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.utils import timezone
 from django.urls import reverse
+from django.conf import settings
+import stripe
+import random
+import string
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+def create_ref_code():
+    return ''.join(random.choices(string.ascii_lowercase + string.digits, k=20))
 
 class HomeView(ListView):
     model = Product
@@ -183,7 +196,7 @@ class CheckoutView(LoginRequiredMixin, View):
                 order.billing_address = address
 
                 order.save()
-                return redirect('core:payment')
+                #return redirect('core:payment')
             else:
                 # if it is not same billing address
                 billing_address_title = form.cleaned_data.get('billing_address_title')
@@ -208,11 +221,114 @@ class CheckoutView(LoginRequiredMixin, View):
                     order.billing_address = address_billing
 
                     order.save()
+                    
+                    
                 else:
                     messages.warning(self.request, "Please enter a valid billing address")
                     return redirect('core:checkout')
-                return redirect('core:payment')
+            YOUR_DOMAIN = "http://127.0.0.1:8000"
+            #Store the product items in line items list
+            line_items = []
+            for order_item in order.items.all():
+                line_items.append({
+                        'price_data': {
+                            'currency': 'usd',
+                            'unit_amount': int(order_item.product.price * 100),
+                            'product_data': {
+                                'name': order_item.product.title,
+                                
+                            },
+                        },
+                        'quantity': order_item.quantity,
+                    })
+            #create checkout session,
+            #Put order_pk and user_pk in metadata. Because we need to know which user is request for payment
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=line_items,
+                metadata={
+                    'order_pk': order.pk,
+                    'user_pk': self.request.user.pk
+                },
+                mode='payment',
+                success_url=YOUR_DOMAIN + '/success/',
+                cancel_url=YOUR_DOMAIN + '/cancel/',
+            )
+            return redirect(checkout_session.url, code=303)
+                
 
-class PaymentView(View):
-    def get(self, *args, **kwargs):
-        return render(self.request, 'payment.html')
+class SuccessView(TemplateView):
+    """
+        If payment is successful
+    """
+    template_name = "snippets/success.html"
+
+class CancelView(TemplateView):
+    """
+        If payment is canceled
+    """
+    template_name = "snippets/cancel.html"
+    
+@csrf_exempt
+def stripe_webhook(request):
+    '''
+        This part will activate when user submits the payment in stripe website
+        Strip webhook must be working for cathing requests!!!!
+    '''
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    event = None
+    try:
+        event = stripe.Webhook.construct_event(
+        payload, sig_header, settings.STRIPE_WEBHOOK_SECRET_KEY #actually this is enpoint secret
+        )
+    except ValueError as e:
+        # Invalid payload
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return HttpResponse(status=400)
+
+    # if it is true, payment was successful 
+    if event['type'] == 'checkout.session.completed':
+        #session contains payment informations
+        session = event['data']['object']
+        customer_email = session['customer_details']['email']
+
+        order_pk = session['metadata']['order_pk']
+        user_pk = session['metadata']['user_pk']
+
+        order = get_object_or_404(Order, pk=order_pk)
+        user = get_object_or_404(User, pk=user_pk)
+
+        # create payment and update values then save
+        payment = Payment()
+        payment.stripe_payment_intent = session['payment_intent']
+        payment.user = user
+        payment.amount = session['amount_total'] / 100
+        payment.save()
+
+        # all order items are ordered now, so change the value to True then save all of them
+        order_items = order.items.all()
+        order_items.update(is_ordered=True)
+        for item in order_items:
+            item.save()
+        
+        # order is finished
+        order.is_ordered = True
+        order.payment = payment
+        order.ref_code = create_ref_code()
+        order.save()
+
+        #send mail to customer, but it is now only works in console 
+        #TODO - in production change mail backends
+        send_mail(
+            subject="Successful Order",
+            message="Your order has been completed.",
+            recipient_list=[customer_email],
+            from_email="emre@test.com"
+        )
+
+    # Passed signature verification
+    return HttpResponse(status=200)
+        
