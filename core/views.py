@@ -8,7 +8,7 @@ from django.views.generic import ListView
 from django.views.generic.base import TemplateView, View
 from django.views.generic.detail import DetailView
 from django.views.decorators.csrf import csrf_exempt
-from .models import Order, Payment, Product, Category, OrderProduct, Address
+from .models import Order, Payment, Product, Category, OrderProduct, Address, Coupon
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
@@ -241,6 +241,11 @@ class CheckoutView(LoginRequiredMixin, View):
                         },
                         'quantity': order_item.quantity,
                     })
+            discounts = []
+            if order.coupon:
+                discounts.append({
+                    'coupon': order.coupon.key
+                })
             #create checkout session,
             #Put order_pk and user_pk in metadata. Because we need to know which user is request for payment
             checkout_session = stripe.checkout.Session.create(
@@ -251,11 +256,31 @@ class CheckoutView(LoginRequiredMixin, View):
                     'user_pk': self.request.user.pk
                 },
                 mode='payment',
+                discounts=discounts,
                 success_url=YOUR_DOMAIN + '/success/',
                 cancel_url=YOUR_DOMAIN + '/cancel/',
             )
             return redirect(checkout_session.url, code=303)
                 
+
+
+class PromoCodeView(LoginRequiredMixin, View):
+    def post(self, *args, **kwargs):
+        form = CouponForm(self.request.POST or None)
+        if form.is_valid():
+            promo_code = form.cleaned_data.get('promo_code')
+            order = get_object_or_404(Order, user=self.request.user, is_ordered=False)
+            #get coupon
+            try:
+                coupon = Coupon.objects.get(key=promo_code)
+                order.coupon = coupon
+                order.save()
+                messages.success(self.request, "Coupon successfully added")
+                return redirect('core:checkout')
+            except ObjectDoesNotExist:
+                messages.info(self.request, 'This coupon does not exist')
+                return redirect('core:checkout')
+
 
 class SuccessView(TemplateView):
     """

@@ -1,0 +1,11 @@
+<!-- Promo code -->
+<form class="card p-2" action="{% url 'core:promo-code' %}" method="POST">
+  {% csrf_token %}
+  <div class="input-group">
+      {{coupon_form.promo_code}}
+    <div class="input-group-append">
+      <button class="btn btn-secondary btn-md waves-effect m-0" type="submit">Redeem</button>
+    </div>
+  </div>
+</form>
+<!-- Promo code -->

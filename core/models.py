@@ -136,6 +136,7 @@ class OrderProduct(models.Model):
 
 class Coupon(models.Model):
     key = models.CharField(max_length=16)
+    #percantage
     amount = models.FloatField()
 
     def __str__(self):
@@ -175,6 +176,8 @@ class Order(models.Model):
         sum = 0
         for item in self.items.all():
             sum += item.get_final_price()
+        if self.coupon:
+            return sum -  (sum * (self.coupon.amount/100))
         return sum
 
 class Refund(models.Model):

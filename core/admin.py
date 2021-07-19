@@ -10,7 +10,8 @@ from .models import (
     Address,
     Payment,
     UserProfile,
-    Refund
+    Refund,
+    Coupon
 )
 
 
@@ -41,3 +42,5 @@ admin.site.register(Payment)
 admin.site.register(UserProfile)
 
 admin.site.register(Refund)
+
+admin.site.register(Coupon)
