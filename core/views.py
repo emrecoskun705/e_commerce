@@ -64,7 +64,7 @@ class CartView(View):
 @login_required
 def add_to_cart(request, slug):
     product = get_object_or_404(Product, slug=slug)
-    order_product, created = OrderProduct.objects.get_or_create(product=product,user=request.user)
+    order_product, created = OrderProduct.objects.get_or_create(product=product,user=request.user, is_ordered=False)
     order_qs = Order.objects.filter(user=request.user, is_ordered=False)
     #if there is an order there are two options
     #1. update quantity
@@ -125,6 +125,7 @@ def remove_one_product(request, slug):
     if order_qs.exists():
         order = order_qs[0]
         if order.items.filter(product__slug=product.slug).exists():
+            print(OrderProduct.objects.filter(product=product,user=request.user,is_ordered=False))
             order_product = OrderProduct.objects.filter(product=product,user=request.user,is_ordered=False)[0]
             if order_product.quantity > 1:
                 order_product.quantity -= 1

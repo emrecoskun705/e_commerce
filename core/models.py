@@ -41,6 +41,9 @@ class Product(models.Model):
         on_delete=models.CASCADE
     )
 
+    def __str__(self):
+        return self.title
+
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
         super(Product, self).save(*args, **kwargs)
