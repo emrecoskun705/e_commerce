@@ -132,6 +132,7 @@ def remove_one_product(request, slug):
                 order_product.save()
             else:
                 order.items.remove(order_product)
+                order_product.delete()
             messages.info(request, "Product has been updated.")
             return redirect("core:cart")
         else:
