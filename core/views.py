@@ -164,7 +164,8 @@ class CheckoutView(LoginRequiredMixin, View):
         if form and form fields are valid for address and order model,
         we will continue to payment part
         """
-        form = CheckoutForm(self.request.POST or None)
+        #first we need to catch the user for __init__, then fetch the post
+        form = CheckoutForm(self.request.user, self.request.POST)
         order = get_object_or_404(Order, user=self.request.user, is_ordered=False)
         if form.is_valid():
             first_name = form.cleaned_data.get('first_name')
@@ -175,43 +176,50 @@ class CheckoutView(LoginRequiredMixin, View):
             else:
                 messages.warning(self.request, 'Please enter your name')
                 return redirect('core:checkout')
+
+            #shipping address informations
             address_title = form.cleaned_data.get('shipping_address_title')
             country = form.cleaned_data.get('country')
             province = form.cleaned_data.get('province')
             zip = form.cleaned_data.get('zip')
             address_detail = form.cleaned_data.get('address_detail')
-            #if they are not empty it will continue
-            if address_title and country and province and zip and address_detail:
-                address = Address(
-                    user = self.request.user,
-                    address_title = address_title,
-                    country = country,
-                    province = province, 
-                    zip = zip,
-                    detail = address_detail
-                )
 
-                address.save()
+            #billing address informations
+            billing_address_title = form.cleaned_data.get('billing_address_title')
+            billing_country = form.cleaned_data.get('billing_country')
+            billing_province = form.cleaned_data.get('billing_province')
+            billing_zip = form.cleaned_data.get('billing_zip')
+            billing_address_detail = form.cleaned_data.get('billing_address_detail')
+
+            #shipping address choice fields values
+            shipping_address = form.cleaned_data.get('shipping_address')
+            billing_address = form.cleaned_data.get('billing_address')
+            # if addresses are not none, it means that address has been selected
+            if shipping_address != "None":              
+                shipping_address = get_object_or_404(Address, pk=int(shipping_address))
             else:
-                messages.warning(self.request, "Please enter a valid address")
-                return redirect('core:checkout')
+                shipping_address = None
 
-            #if same billing address is true, shipping and billing address will be same
-            if form.cleaned_data.get('same_billing_address'):
-                order.shipping_address = address
-                order.billing_address = address
+            if billing_address != "None":
+                billing_address = get_object_or_404(Address, pk=int(billing_address))
+            else:
+                billing_address = None
 
+            # check all fields then update the order
+            if (shipping_address is not None) and (billing_address is not None):
+                order.shipping_address = shipping_address
+                order.billing_address = billing_address
                 order.save()
-                #return redirect('core:payment')
-            else:
-                # if it is not same billing address
-                billing_address_title = form.cleaned_data.get('billing_address_title')
-                billing_country = form.cleaned_data.get('billing_country')
-                billing_province = form.cleaned_data.get('billing_province')
-                billing_zip = form.cleaned_data.get('billing_zip')
-                billing_address_detail = form.cleaned_data.get('billing_address_detail')
+            elif (shipping_address is not None) and (form.cleaned_data.get('same_billing_address')):
+                order.shipping_address = shipping_address
+                order.billing_address = shipping_address
+                order.save()
+            elif (billing_address is not None) and (form.cleaned_data.get('same_billing_address')):
+                order.shipping_address = billing_address
+                order.billing_address = billing_address
+                order.save()
+            elif shipping_address is not None:
                 if billing_address_title and billing_country and billing_province and billing_zip and billing_address_detail:
-
                     address_billing = Address(
                         user = self.request.user,
                         address_title = billing_address_title,
@@ -222,16 +230,82 @@ class CheckoutView(LoginRequiredMixin, View):
                     )
 
                     address_billing.save()
-
-                    order.shipping_address = address
+                    order.shipping_address = shipping_address
                     order.billing_address = address_billing
+                    order.save()
+                else:
+                    messages.warning(self.request, "Please enter a valid address")
+                    return redirect('core:checkout')
+            elif billing_address is not None:
+                if address_title and country and province and zip and address_detail:
+                    address = Address(
+                        user = self.request.user,
+                        address_title = address_title,
+                        country = country,
+                        province = province, 
+                        zip = zip,
+                        detail = address_detail
+                    )
+
+                    address.save()
+                    order.shipping_address = address
+                    order.billing_address = billing_address
+                    order.save()
+                else:
+                    messages.warning(self.request, "Please enter a valid address")
+                    return redirect('core:checkout')
+            else:
+
+                #if they are not empty it will continue for shipping address
+                if address_title and country and province and zip and address_detail:
+                    address = Address(
+                        user = self.request.user,
+                        address_title = address_title,
+                        country = country,
+                        province = province, 
+                        zip = zip,
+                        detail = address_detail
+                    )
+
+                    address.save()
+                else:
+                    messages.warning(self.request, "Please enter a valid address")
+                    return redirect('core:checkout')
+
+                #if same billing address is true, shipping and billing address will be same
+                if form.cleaned_data.get('same_billing_address'):
+                    order.shipping_address = address
+                    order.billing_address = address
 
                     order.save()
-                    
-                    
+                    #return redirect('core:payment')
                 else:
-                    messages.warning(self.request, "Please enter a valid billing address")
-                    return redirect('core:checkout')
+                    # if it is not same billing address
+                    
+                    if billing_address_title and billing_country and billing_province and billing_zip and billing_address_detail:
+
+                        address_billing = Address(
+                            user = self.request.user,
+                            address_title = billing_address_title,
+                            country = billing_country,
+                            province = billing_province, 
+                            zip = billing_zip,
+                            detail = billing_address_detail
+                        )
+
+                        address_billing.save()
+
+                        order.shipping_address = address
+                        order.billing_address = address_billing
+
+                        order.save()
+                        
+                        
+                    else:
+                        messages.warning(self.request, "Please enter a valid billing address")
+                        return redirect('core:checkout')
+
+            #stripe
             YOUR_DOMAIN = "http://127.0.0.1:8000"
             #Store the product items in line items list
             line_items = []

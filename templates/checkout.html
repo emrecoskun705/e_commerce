@@ -22,7 +22,16 @@
         <!--Card content-->
         <form method="POST" action="{% url 'core:checkout' %}" class="card-body">
           {% csrf_token %}
-
+          <div class="row">
+            <div class="col-lg-6 col-md-12 mb-4">
+              <label for="id_shipping_address">Shipping Address</label>
+              {{checkout_form.shipping_address}}
+            </div>
+            <div class="col-lg-6 col-md-12 mb-4">
+              <label for="id_billing_address">Billing Address</label>
+              {{checkout_form.billing_address}}
+            </div>
+          </div>
 
           <!--Grid row-->
           <div class="row">
