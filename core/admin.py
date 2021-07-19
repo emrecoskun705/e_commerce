@@ -1,5 +1,12 @@
 from django.contrib import admin
 from mptt.admin import MPTTModelAdmin
+from django.contrib.auth.decorators import login_required
+
+"""
+Django allauth does not work for admin site authentication, so it may be brute forced by attackers.
+Prevent this, we change the admin site login method to django-allauth login method
+"""
+admin.site.login = login_required(admin.site.login)
 
 from .models import (
     Product,
