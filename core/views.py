@@ -52,6 +52,10 @@ class CartView(View):
                 context = {
                     'order': order
                 }
+                #if cart is empty no need to show cart view
+                if order.items.count() == 0:
+                    messages.warning(self.request, 'No products in here')
+                    return redirect('/')
                 return render(self.request, 'cart.html', context)
             except ObjectDoesNotExist:
                 messages.warning(self.request, 'No products in here')
