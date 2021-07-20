@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if orders %}
+<div class="row mt-3">
+  <div class="col-4">
+    <h2 class="text-center">Orders</h2>
+  </div>
+  <div class="col-8">
+    <h2 class="text-center">Products</h2>
+  </div>
+</div>
+<div class="row mt-3">
+  <div class="col-4">
+    <div class="list-group" id="list-tab" role="tablist">
+    {% for order in orders %}
+      <a class="list-group-item list-group-item-action" id="list-{{order.ref_code}}-list" data-toggle="list" href="#list-{{order.ref_code}}" role="tab" aria-controls="home">{{order.ref_code}}</a>
+    {% endfor %}
+    </div>
+  </div>
+  <div class="col-8">
+    <div class="tab-content" id="nav-tabContent">
+      {% for order in orders %}
+        <div class="tab-pane fade show" id="list-{{order.ref_code}}" role="tabpanel" aria-labelledby="list-{{order.ref_code}}-list">
+            <table class="table">
+              <thead>
+                <tr>        
+                  <th scope="col">Product Name</th>
+                  <th scope="col">Product Price</th>
+                  <th scope="col">Quantity</th>         
+                </tr>
+              </thead>
+              <tbody id="cartTable">
+                {% for orderProduct in order.items.all %}
+                <tr>
+                  <td>
+                    <a href="{{ orderProduct.product.get_absolute_url }}">{{orderProduct.product.title}}</a>
+                  </td>
+                  <td>{{orderProduct.product.price}}$</td>
+                  <td>{{orderProduct.quantity}}</td>
+                </tr> 
+                {% endfor %}                       
+              </tbody>           
+            </table>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% else %}
+<!-- Empty order list  -->
+<div class="container-fluid mt-100">
+  <div class="row">
+      <div class="col-md-12">
+          <div class="card">
+              <div class="card-header">
+                  <h5>Orders</h5>
+              </div>
+              <div class="card-body cart">
+                  <div class="col-sm-12 empty-cart-cls text-center"><i class="fas fa-shopping-cart fa-5x"></i>
+                      <h3><strong>No orders</strong></h3>
+                      <h4>You don't have any compleated orders</h4> <a href="/" class="btn btn-primary cart-btn-transform m-3" data-abc="true">continue shopping</a>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock content %}

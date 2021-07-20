@@ -16,6 +16,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.urls import reverse
 from django.conf import settings
+from datetime import datetime
 import stripe
 import random
 import string
@@ -24,6 +25,8 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 def create_ref_code():
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=20))
+
+
 
 class HomeView(ListView):
     model = Product
@@ -38,6 +41,18 @@ class HomeView(ListView):
         context['categories'] = Category.objects.filter(level__lt=1)
         return context
 
+
+class OrderListView(LoginRequiredMixin ,ListView):
+    template_name = 'orders.html'
+    context_object_name = 'orders'
+
+    def get_queryset(self):
+        #list by the user
+        queryset = Order.objects.filter(user=self.request.user, is_ordered=True)
+        return queryset
+    
+    
+    
 class ProductDetailView(DetailView):
     """Product detail view, it finds prdocut by slug in core.urls"""
     model = Product
@@ -417,12 +432,15 @@ def stripe_webhook(request):
         order_items = order.items.all()
         order_items.update(is_ordered=True)
         for item in order_items:
+            item.product.stock -= item.quantity
+            item.product.save()
             item.save()
         
         # order is finished
         order.is_ordered = True
         order.payment = payment
         order.ref_code = create_ref_code()
+        order.order_date = datetime.now(tz=timezone.utc)
         order.save()
 
         #send mail to customer, but it is now only works in console 

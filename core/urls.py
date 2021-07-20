@@ -7,6 +7,7 @@ from .views import (
     SuccessView,
     CancelView,
     PromoCodeView,
+    OrderListView,
     #PaymentView,
     add_to_cart,
     remove_product_from_cart,
@@ -28,5 +29,6 @@ urlpatterns = [
     path('webhooks/stripe/', stripe_webhook, name='stripe-webhook'),
     path('success/', SuccessView.as_view(), name='success'),
     path('cancel/', CancelView.as_view(), name='cancel'),
+    path('orders/', OrderListView.as_view(), name='order-list'),
     #path('payment/', PaymentView.as_view(), name='payment'),
 ]

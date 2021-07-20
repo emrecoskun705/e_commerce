@@ -1,4 +1,5 @@
   {% load cart_template_tags %}
+  {% load static %}
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light white scrolling-navbar">
     <div class="container">
@@ -46,10 +47,18 @@
             </a>
           </li>
           {% if request.user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link waves-effect" href="{% url 'account_logout' %}">
-                <span class="clearfix d-none d-sm-inline-block"> Logout </span>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-user-alt"></i>
               </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="#">Profile</a>
+                <a class="dropdown-item" href="{% url 'core:order-list' %}">Orders</a>
+                <a class="dropdown-item" href="#">Refunds</a>
+                <a class="dropdown-item" href="{% url 'account_logout' %}">
+                  Logout<i class="fas fa-sign-out-alt pl-3"></i>
+                </a>
+              </div>
             </li>
           {% else %}
             <li class="nav-item">
