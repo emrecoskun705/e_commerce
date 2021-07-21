@@ -48,7 +48,7 @@ class OrderListView(LoginRequiredMixin ,ListView):
 
     def get_queryset(self):
         #list by the user
-        queryset = Order.objects.filter(user=self.request.user, is_ordered=True)
+        queryset = Order.objects.filter(user=self.request.user, is_ordered=True).order_by('-order_date')
         return queryset
     
     
@@ -68,7 +68,7 @@ class CartView(View):
                     'order': order
                 }
                 #if cart is empty no need to show cart view
-                if order.items.count() == 0:
+                if order.items.count() < 1:
                     messages.warning(self.request, 'No products in here')
                     return redirect('/')
                 return render(self.request, 'cart.html', context)

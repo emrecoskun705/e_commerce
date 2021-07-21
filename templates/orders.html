@@ -14,7 +14,9 @@
   <div class="col-4">
     <div class="list-group" id="list-tab" role="tablist">
     {% for order in orders %}
-      <a class="list-group-item list-group-item-action" id="list-{{order.ref_code}}-list" data-toggle="list" href="#list-{{order.ref_code}}" role="tab" aria-controls="home">{{order.ref_code}}</a>
+      <a class="list-group-item list-group-item-action" id="list-{{order.ref_code}}-list" data-toggle="list" href="#list-{{order.ref_code}}" role="tab" aria-controls="home">
+       <strong>{{order.ref_code}}</strong> 
+      </a>
     {% endfor %}
     </div>
   </div>
@@ -22,6 +24,7 @@
     <div class="tab-content" id="nav-tabContent">
       {% for order in orders %}
         <div class="tab-pane fade show" id="list-{{order.ref_code}}" role="tabpanel" aria-labelledby="list-{{order.ref_code}}-list">
+            <p><strong class="pl-2">Order Date: {{order.order_date}}</strong></p>
             <table class="table">
               <thead>
                 <tr>        
@@ -42,6 +45,13 @@
                 {% endfor %}                       
               </tbody>           
             </table>
+            {% if order.coupon %}
+            
+            <h4 class="pl-2"><strong>Total Price: <del>${{order.get_total_order_price_without_coupon}}</del> ${{order.get_total_order_price}}</strong></h4>
+            {% else %}
+              <h4 class="pl-2"><strong>Total Price: ${{order.get_total_order_price}}</strong></h4>
+            {% endif %}
+            
         </div>
       {% endfor %}
     </div>

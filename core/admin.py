@@ -40,7 +40,6 @@ admin.site.register(Category, MPTTModelAdmin)
 
 admin.site.register(OrderProduct)
 
-admin.site.register(Order)
 
 admin.site.register(Address)
 
@@ -51,3 +50,7 @@ admin.site.register(UserProfile)
 admin.site.register(Refund)
 
 admin.site.register(Coupon)
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('user', 'ref_code')

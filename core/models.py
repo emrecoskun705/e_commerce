@@ -175,6 +175,12 @@ class Order(models.Model):
     def __str__(self):
         return self.user.username
 
+    def get_total_order_price_without_coupon(self):
+        sum = 0
+        for item in self.items.all():
+            sum += item.get_final_price()
+
+        return sum
     def get_total_order_price(self):
         sum = 0
         for item in self.items.all():
