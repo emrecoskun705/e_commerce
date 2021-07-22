@@ -1,17 +1,10 @@
 {% extends "base.html" %}
-
+{% load image_template_tags %}
 {% block content %}
 {% if orders %}
+
 <div class="row mt-3">
-  <div class="col-4">
-    <h2 class="text-center">Orders</h2>
-  </div>
-  <div class="col-8">
-    <h2 class="text-center">Products</h2>
-  </div>
-</div>
-<div class="row mt-3">
-  <div class="col-4">
+  <div class="col-md-4">
     <div class="list-group" id="list-tab" role="tablist">
     {% for order in orders %}
       <a class="list-group-item list-group-item-action" id="list-{{order.ref_code}}-list" data-toggle="list" href="#list-{{order.ref_code}}" role="tab" aria-controls="home">
@@ -20,14 +13,23 @@
     {% endfor %}
     </div>
   </div>
-  <div class="col-8">
+  <div class="col-md-8">
     <div class="tab-content" id="nav-tabContent">
       {% for order in orders %}
         <div class="tab-pane fade show" id="list-{{order.ref_code}}" role="tabpanel" aria-labelledby="list-{{order.ref_code}}-list">
-            <p><strong class="pl-2">Order Date: {{order.order_date}}</strong></p>
+            <div class="row">
+              <div class="col-8">
+                <p class="pt-4"><strong class="pl-2">Order Date: {{order.order_date}}</strong></p>
+              </div>
+              <div class="col-4">
+                <a href="{% url 'core:refund' order.ref_code %}" class="btn btn-primary">Refund Request</a>
+              </div>
+            </div>
+            
             <table class="table">
               <thead>
-                <tr>        
+                <tr>
+                  <th scope="col">Product Image</th>         
                   <th scope="col">Product Name</th>
                   <th scope="col">Product Price</th>
                   <th scope="col">Quantity</th>         
@@ -36,6 +38,7 @@
               <tbody id="cartTable">
                 {% for orderProduct in order.items.all %}
                 <tr>
+                  <td style="text-align: center" ><img width="{% handle_width orderProduct.product.image 60 %}" height="60px" src="{{orderProduct.product.image.url}}" alt="asd"></td>
                   <td>
                     <a href="{{ orderProduct.product.get_absolute_url }}">{{orderProduct.product.title}}</a>
                   </td>

@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
-from django.forms.widgets import Widget
+from django.forms.widgets import Textarea, Widget
 from .models import Address
 
 class CheckoutForm(forms.Form):
@@ -48,3 +48,9 @@ class CouponForm(forms.Form):
         'class': 'form-control',
         'placeholder': 'Promo code'
     }))
+
+class RefundForm(forms.Form):
+    reason = forms.CharField(widget=Textarea(attrs={
+        'rows': 4
+    }))
+    email = forms.EmailField()

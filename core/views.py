@@ -1,5 +1,6 @@
+import re
 from django.urls.conf import path
-from core.forms import CheckoutForm, CouponForm
+from core.forms import CheckoutForm, CouponForm, RefundForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.http import request, JsonResponse, HttpResponse
@@ -8,7 +9,7 @@ from django.views.generic import ListView
 from django.views.generic.base import TemplateView, View
 from django.views.generic.detail import DetailView
 from django.views.decorators.csrf import csrf_exempt
-from .models import Order, Payment, Product, Category, OrderProduct, Address, Coupon
+from .models import Order, Payment, Product, Category, OrderProduct, Address, Coupon, Refund
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
@@ -356,7 +357,68 @@ class CheckoutView(LoginRequiredMixin, View):
                 cancel_url=YOUR_DOMAIN + '/cancel/',
             )
             return redirect(checkout_session.url, code=303)
-                
+            
+
+class RefunRequestView(LoginRequiredMixin, View):
+    def get(self, request, ref_code, *args, **kwargs):
+        order = get_object_or_404(Order, ref_code=ref_code, user=self.request.user)
+
+        if order.order_date and (datetime.now(tz=timezone.utc) - order.order_date).days > 14:
+            messages.warning(self.request, 'You can not refund after 14 days')
+            return redirect('/')
+        form = RefundForm()
+        context = {
+            'form': form
+        }
+        return render(self.request, 'refund.html', context)
+    
+    def post(self, request,  ref_code, *args, **kwargs):
+        order = get_object_or_404(Order, ref_code=ref_code, user=self.request.user)
+        if order.order_date and (datetime.now(tz=timezone.utc) - order.order_date).days > 14:
+            messages.warning(self.request, 'You can not refund after 14 days')
+            return redirect('/')
+        form = RefundForm(self.request.POST or None)
+        if form.is_valid():
+            reason = form.cleaned_data.get('reason')
+            email = form.cleaned_data.get('email')
+
+            #update bool refun request for order
+            order.is_refund_requested = True
+            order.save()
+
+            #create refund request
+            refund = Refund()
+            refund.order = order
+            refund.reason = reason
+            refund.email = email
+            refund.save()
+
+            
+            send_mail(
+                subject="Refund Request",
+                message="Refund request has been received.",
+                recipient_list=[email],
+                from_email="emre@test.com"
+            )
+
+            messages.info(self.request, 'We will be contact you, soon')
+            #Redirect to refund lists
+            return redirect('core:refund-list')
+        messages.warning(self.request, 'Please give valid form inputs')
+        # Redirects the same page
+        return redirect(self.request.META.get('HTTP_REFERER'))
+
+class RefundListView(LoginRequiredMixin, ListView):
+    """
+    Refund List for requested user
+    """
+    template_name = 'refund-list.html'
+    context_object_name = 'refunds'
+
+    def get_queryset(self):
+        #list by the user
+        queryset = Refund.objects.filter(order__user=self.request.user).order_by('-timestamp')
+        return queryset
 
 
 class PromoCodeView(LoginRequiredMixin, View):

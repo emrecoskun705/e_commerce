@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.expressions import F
 from django.db.models.signals import post_save
 from django.http import request
 from mptt.models import MPTTModel, TreeForeignKey
@@ -189,15 +190,6 @@ class Order(models.Model):
             return sum -  (sum * (self.coupon.amount/100))
         return sum
 
-class Refund(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    reason = models.TextField()
-    accepted = models.BooleanField(default=False)
-    email = models.EmailField()
-
-    def __str__(self):
-        return str(self.pk)
-
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     stripe_customer_id = models.CharField(max_length=50, blank=True, null=True)
@@ -214,6 +206,16 @@ class Payment(models.Model):
 
     def __str__(self):
         return self.user.username
+
+class Refund(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    reason = models.TextField()
+    email = models.EmailField()
+    accepted = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.order.user.username
 
 def userprofile_receiver(sender, instance, created, *args, **kwargs):
     if created:

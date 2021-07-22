@@ -8,6 +8,8 @@ from .views import (
     CancelView,
     PromoCodeView,
     OrderListView,
+    RefunRequestView,
+    RefundListView,
     #PaymentView,
     add_to_cart,
     remove_product_from_cart,
@@ -30,5 +32,7 @@ urlpatterns = [
     path('success/', SuccessView.as_view(), name='success'),
     path('cancel/', CancelView.as_view(), name='cancel'),
     path('orders/', OrderListView.as_view(), name='order-list'),
+    path('refund/<str:ref_code>/', RefunRequestView.as_view(), name='refund'),
+    path('refund-list/', RefundListView.as_view(), name='refund-list'),
     #path('payment/', PaymentView.as_view(), name='payment'),
 ]
