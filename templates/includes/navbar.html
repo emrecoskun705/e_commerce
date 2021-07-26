@@ -27,11 +27,11 @@
           </li>
         </ul>-->
 
-        <form class="form-inline my-2 my-lg-0 ml-auto mr-auto">
-        
-          <input type="search" id="form1" class="form-control" placeholder="Search" style="width: 400px"/>
+        <form method="GET" action="{% url 'core:search' %}" class="form-inline my-2 my-lg-0 ml-auto mr-auto">
           
-          <button type="button" class="btn btn-primary btn-sm">
+          <input name="search" type="search" id="form1" class="form-control" placeholder="Search" style="width: 400px"/>
+          
+          <button type="submit" class="btn btn-primary btn-sm">
             <i class="fas fa-search" ></i>
           </button>
           

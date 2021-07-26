@@ -107,6 +107,7 @@ class Category(MPTTModel):
     def get_name(self):
         return self.name
 
+
 class ProductImage(models.Model):
     """
         Add multiple images for one product

@@ -1,6 +1,6 @@
 import re
-from django.urls.conf import path
-from core.forms import CheckoutForm, CouponForm, RefundForm
+from django.urls.conf import include, path
+from core.forms import CheckoutForm, CouponForm, RefundForm, SearchForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.http import request, JsonResponse, HttpResponse
@@ -42,6 +42,35 @@ class HomeView(ListView):
         context['categories'] = Category.objects.filter(level__lt=1)
         return context
 
+class SearchView(View):
+    def get(self, *args, **kwargs):
+        """
+        Simple search engine for searching by category and product name
+        """
+        search = self.request.GET.get('search')
+        category = self.request.GET.get('category')
+        if search:
+            #filters products if it contains search attribute
+            product_list = Product.objects.filter(title__icontains=search)
+            context = {
+                'product_list': product_list
+            }
+        elif category:
+            #category = get_object_or_404(Category, slug=category)
+            #print(category)
+            try:
+                # Collects all the product for a category including their descendants
+                product_list = Product.objects.filter(category__in=Category.objects.get(slug=category).get_descendants(include_self=True))
+            except ObjectDoesNotExist:
+                messages.warning('There is no category like this')
+                return redirect('/')
+            
+            context = {
+                'product_list': product_list
+            }
+
+        return render(self.request, 'search.html', context)
+            
 
 class OrderListView(LoginRequiredMixin ,ListView):
     template_name = 'orders.html'

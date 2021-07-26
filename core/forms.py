@@ -54,3 +54,6 @@ class RefundForm(forms.Form):
         'rows': 4
     }))
     email = forms.EmailField()
+
+class SearchForm(forms.Form):
+    search = forms.CharField()
