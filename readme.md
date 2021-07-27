@@ -1,3 +1,6 @@
+
+https://user-images.githubusercontent.com/57330864/127233277-4d24491b-aec0-4d94-86e5-f7883843eafa.mp4
+
 # Django E-Commerce
 
 Simple django e-commertce website
