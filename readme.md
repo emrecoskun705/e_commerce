@@ -73,8 +73,8 @@ stripe listen --forward-to localhost:8000/webhooks/stripe/
 
 
 
-   [Python]: <http://angularjs.org>
-   [Django]: <http://angularjs.org>
+   [Python]: https://www.python.org/downloads/release/python-370/
+   [Django]: https://www.djangoproject.com/download/
    [Template]: https://mdbootstrap.com/freebies/jquery/e-commerce/
    [Stripe CLI]: https://stripe.com/docs/stripe-cli#install
   
