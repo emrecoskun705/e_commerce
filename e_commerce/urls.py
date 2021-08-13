@@ -12,6 +12,7 @@ urlpatterns = [
     path('rest-auth/registration/', include('rest_auth.registration.urls')),
     
     path('', include('core.urls', namespace='core')),
+    path('api/', include('api.urls', namespace='api')),
     path('api-auth/', include('rest_framework.urls')),
 ]
 
