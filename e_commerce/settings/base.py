@@ -38,6 +38,10 @@ INSTALLED_APPS = [
 
     #rest framework
     'rest_framework',
+    'rest_framework.authtoken',
+
+    # rest auth for django allauth 
+    'rest_auth',
     
     
 ]
@@ -98,6 +102,12 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
 
 WSGI_APPLICATION = 'e_commerce.wsgi.application'
 
