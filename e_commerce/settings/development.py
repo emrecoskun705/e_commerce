@@ -4,7 +4,7 @@ from decouple import config
 
 DEBUG = config('DEBUG')
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['*',]
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases

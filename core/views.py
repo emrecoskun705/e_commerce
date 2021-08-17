@@ -1,6 +1,5 @@
-import re
 from django.urls.conf import include, path
-from core.forms import CheckoutForm, CouponForm, RefundForm, SearchForm
+from core.forms import CheckoutForm, CouponForm, RefundForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.http import request, JsonResponse, HttpResponse
@@ -15,7 +14,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.utils import timezone
-from django.urls import reverse
 from django.conf import settings
 from datetime import datetime
 import stripe

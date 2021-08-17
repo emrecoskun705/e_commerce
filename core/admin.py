@@ -18,7 +18,11 @@ from .models import (
     Payment,
     UserProfile,
     Refund,
-    Coupon
+    Coupon,
+    Rate,
+    ProductRate,
+    SpecialProduct,
+    FavouriteProduct,
 )
 
 
@@ -50,6 +54,21 @@ admin.site.register(UserProfile)
 admin.site.register(Refund)
 
 admin.site.register(Coupon)
+
+
+admin.site.register(FavouriteProduct)
+
+@admin.register(SpecialProduct)
+class SpecialProductAdmin(admin.ModelAdmin):
+    list_display = ('title',)
+
+@admin.register(Rate)
+class RateAdmin(admin.ModelAdmin):
+    list_display = ('user','rate')
+
+@admin.register(ProductRate)
+class ProductRateAdmin(admin.ModelAdmin):
+    list_display = ('product',)
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):

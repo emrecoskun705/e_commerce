@@ -1,13 +1,15 @@
 from django.db import models
-from django.db.models.expressions import F
+from django.db.models import Q, CheckConstraint
+from django.db.models.aggregates import Min
+from django.db.models.fields.related import ForeignKey, ManyToManyField, OneToOneField
 from django.db.models.signals import post_save
 from django.http import request
 from mptt.models import MPTTModel, TreeForeignKey
 from django.utils.text import slugify
 from django.conf import Settings, settings
 from django.urls import reverse
-from django.db.models import Sum
 
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 class Address(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='addresses')
@@ -23,6 +25,32 @@ class Address(models.Model):
     class Meta:
         verbose_name_plural = 'Addresses'
     
+
+
+class ProductRate(models.Model):
+    product = OneToOneField('Product', on_delete=models.CASCADE)
+    user_rates = ManyToManyField('Rate')
+
+
+class Rate(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    rate = models.FloatField(default=0.0, validators=[MinValueValidator(0.0), MaxValueValidator(5.0)])
+
+    class Meta:
+        constraints = (
+            CheckConstraint(
+                check=Q(rate__gte=0.0) & Q(rate__lte=5.0),
+                name='star_rate_range'
+            ),
+        )
+
+class SpecialProduct(models.Model):
+    title = models.CharField(max_length=120) # trend, most bougth, etc.
+    products = models.ManyToManyField('Product')
+
+class FavouriteProduct(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    products = models.ManyToManyField('Product')
 
 class Product(models.Model):
     """
