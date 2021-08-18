@@ -4,7 +4,8 @@ from core.models import Product
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['title',
+        fields = ['id',
+                'title',
                 'price',
                 'discount_price',
                 'slug',

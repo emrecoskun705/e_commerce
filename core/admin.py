@@ -32,7 +32,7 @@ class ProductImageAdmin(admin.StackedInline):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductImageAdmin]
-
+    readonly_fields = ('id',)
     class Meta:
         model = Product
 
