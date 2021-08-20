@@ -1,15 +1,19 @@
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import views
+from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import status
+from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import mixins
 from rest_framework.authentication import TokenAuthentication
 
-from .serializers import ProductSerializer
+from .serializers import ProductSerializer, MinimalProductSerializer
 from rest_framework import generics
+from rest_framework import viewsets
 
 from core.models import FavouriteProduct, Product, SpecialProduct
 
@@ -24,19 +28,59 @@ class ProductList(mixins.ListModelMixin, generics.GenericAPIView):
 # gets the all trend products
 class TrendProductList(mixins.ListModelMixin, generics.GenericAPIView):
     queryset = SpecialProduct.objects.filter(title='trend')[0].products.all()
-    serializer_class = ProductSerializer
+    serializer_class = MinimalProductSerializer
 
     def get(self, requset, *args, **kwargs):
         return self.list(requset, *args, **kwargs)
 
+class ProductDetail(generics.GenericAPIView):
+    def get(self, request, format=None):
+        try:
+            
+            productId = int(request.query_params['productId'])
+            product = Product.objects.get(id=productId)
+        
+            return Response(ProductSerializer(product).data, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            print('a')
+            return Response({'Object does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            print(request.data)
+            return Response({'productId': 'This field is required and must be numeric'} ,status=status.HTTP_400_BAD_REQUEST)
+    
 
-class FavouriteProductList(generics.GenericAPIView):
+class UserFavouriteProduct(generics.GenericAPIView):
+    authentication_classes = (TokenAuthentication,)
+    # if product id in facourite product list for that user response 200, or 404, 400
+    def get(self, request, format=None):
+        print('sa')
+        try:
+            productId = int(request.query_params['productId'])
+            if(productId in [product.id for product in FavouriteProduct.objects.get(user=request.user).products.all()]):
+                return Response(status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class UserFavouriteProductList(generics.GenericAPIView):
     authentication_classes = (TokenAuthentication,)
 
     # gets(response) the favourite products for requested user 
     def get(self, request, format=None):
-        product_list = [product for product in FavouriteProduct.objects.get(user=request.user).products.all()]
-        return Response(ProductSerializer(product_list, many=True).data)
+        product_list = FavouriteProduct.objects.get(user=request.user).products.all()
+        
+        # if product id is given return response
+        try:
+            # this query parameter is optional, for only getting the specific product is in that favaourite product list
+            productId = int(request.query_params['productId'])
+            if productId in [product.id for product in product_list]:
+                return Response(status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        except:
+            # return list of favourite product
+            return Response(ProductSerializer(product_list, many=True).data)
 
     # add product to favouriteProductlist or removes from favouriteProductlist
     # post method parameters are = ['id', 'action']
