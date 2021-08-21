@@ -42,6 +42,9 @@ INSTALLED_APPS = [
 
     # rest auth for django allauth 
     'rest_auth',
+
+    # filtering queries
+    'django_filters',
     
     
 ]
@@ -110,7 +113,8 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
        # 'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
 

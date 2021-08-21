@@ -1,6 +1,9 @@
+from django.db.models import fields
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
+from django_filters.filterset import filterset_factory
 from rest_framework import views
+import rest_framework
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import status
@@ -10,12 +13,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import mixins
 from rest_framework.authentication import TokenAuthentication
+from rest_framework import generics
 
 from .serializers import ProductSerializer, MinimalProductSerializer
-from rest_framework import generics
-from rest_framework import viewsets
+from . filters import ProductFilter
+from .paginations import SearchProductPagination
 
-from core.models import FavouriteProduct, Product, SpecialProduct
+from core.models import FavouriteProduct, Product, SpecialProduct, Category
 
 # gets all product list (not used in anywhere)
 class ProductList(mixins.ListModelMixin, generics.GenericAPIView):
@@ -119,6 +123,15 @@ class UserFavouriteProductList(generics.GenericAPIView):
                 #if product exist
             except ObjectDoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+#searchs product for given query(title only)
+class SearchProduct(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = MinimalProductSerializer
+    filterset_class = ProductFilter
+    pagination_class = SearchProductPagination
+
             
             
 
