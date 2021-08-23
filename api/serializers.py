@@ -1,5 +1,6 @@
+from django.db import models
 from rest_framework import fields, serializers
-from core.models import Product, ProductImage
+from core.models import Product, Category
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,4 +27,14 @@ class MinimalProductSerializer(serializers.ModelSerializer):
             'price',
             'discount_price',
             'image',
+        ]
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = [
+            'id',
+            'name',
+            'slug',
+            'parent',
         ]

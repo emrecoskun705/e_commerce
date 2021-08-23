@@ -7,6 +7,7 @@ from .views import (
     ProductDetail,
     UserFavouriteProduct,
     SearchProduct,
+    CategoryList,
     )
 
 app_name = 'api'
@@ -18,4 +19,5 @@ urlpatterns = [
     path('favourite-product-list/?<productId>/', UserFavouriteProduct.as_view(), name='favourite-product'),
     path('product-detail/', ProductDetail.as_view(), name='product-detail'),
     path('search-product/', SearchProduct.as_view(), name='search-product'),
+    path('category-list/', CategoryList.as_view(), name='category-list'),
 ]

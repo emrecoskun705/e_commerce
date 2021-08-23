@@ -15,7 +15,7 @@ from rest_framework import mixins
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import generics
 
-from .serializers import ProductSerializer, MinimalProductSerializer
+from .serializers import CategorySerializer, ProductSerializer, MinimalProductSerializer
 from . filters import ProductFilter
 from .paginations import SearchProductPagination
 
@@ -46,10 +46,8 @@ class ProductDetail(generics.GenericAPIView):
         
             return Response(ProductSerializer(product).data, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
-            print('a')
             return Response({'Object does not exist'}, status=status.HTTP_400_BAD_REQUEST)
         except:
-            print(request.data)
             return Response({'productId': 'This field is required and must be numeric'} ,status=status.HTTP_400_BAD_REQUEST)
     
 
@@ -57,7 +55,6 @@ class UserFavouriteProduct(generics.GenericAPIView):
     authentication_classes = (TokenAuthentication,)
     # if product id in facourite product list for that user response 200, or 404, 400
     def get(self, request, format=None):
-        print('sa')
         try:
             productId = int(request.query_params['productId'])
             if(productId in [product.id for product in FavouriteProduct.objects.get(user=request.user).products.all()]):
@@ -131,6 +128,23 @@ class SearchProduct(generics.ListAPIView):
     serializer_class = MinimalProductSerializer
     filterset_class = ProductFilter
     pagination_class = SearchProductPagination
+
+class CategoryList(generics.GenericAPIView):
+    # gets category's descendants and itself by it's slug
+    # query parameters = ['slug']
+    def get(self, request, format=None):
+        try:
+            category_slug = request.query_params['slug']
+            if(category_slug == 'root'):
+                categories = Category.objects.filter(level__lt=1)
+            else:
+                categories = Category.objects.get(slug=category_slug).get_descendants(include_self=True)
+            
+            return Response(CategorySerializer(categories, many=True).data, status=status.HTTP_200_OK)
+        except Category.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
             
             
