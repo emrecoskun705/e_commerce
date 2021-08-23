@@ -1,6 +1,7 @@
 from django.db.models import fields
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
+from django.views.decorators.csrf import csrf_exempt
 from django_filters.filterset import filterset_factory
 from rest_framework import views
 import rest_framework
@@ -9,14 +10,17 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import status
 from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import mixins
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import generics
 
+from rest_framework.pagination import PageNumberPagination
+
 from .serializers import CategorySerializer, ProductSerializer, MinimalProductSerializer
-from . filters import ProductFilter
+from . filters import ProductFilter, CategoryProductFilter
 from .paginations import SearchProductPagination
 
 from core.models import FavouriteProduct, Product, SpecialProduct, Category
@@ -146,7 +150,50 @@ class CategoryList(generics.GenericAPIView):
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-            
+class CategoryProductList(APIView):
+    pagination_class = SearchProductPagination
+    
+    # gets products for a category (includes it's descendants products)
+    # than pagine it according to pagination class
+    def get(self, request, format=None):
+        try:
+            category_slug = request.query_params['slug']
+
+            product_list = Product.objects.filter(category__in=Category.objects.get(slug=category_slug).get_descendants(include_self=True))
+            page = self.paginate_queryset(product_list)
+
+            if page is not None:
+                serializer = self.get_paginated_response(MinimalProductSerializer(page,many=True).data)
+            else:
+                serializer = MinimalProductSerializer(product_list, many=True)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Category.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+    # these methods required for pagination to work
+    @property
+    def paginator(self):
+        if not hasattr(self, '_paginator'):
+            if self.pagination_class is None:
+                self._paginator = None
+            else:
+                self._paginator = self.pagination_class()
+        else:
+            pass
+        return self._paginator
+    def paginate_queryset(self, queryset):
+        
+        if self.paginator is None:
+            return None
+        return self.paginator.paginate_queryset(queryset,
+                   self.request, view=self)
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
             
 
 
