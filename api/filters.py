@@ -12,10 +12,11 @@ class ProductFilter(filters.FilterSet):
         model = Product
         fields = ('title',)
 
-class CategoryProductFilter(filters.FilterSet):
-    slug = filters.CharFilter(required=True, lookup_expr='exact')
+class ProductFilterID(filters.FilterSet):
+    id = filters.CharFilter(required=True)
 
     class Meta:
         model = Product
-        fields = ('category__slug',)
+        fields = ('id',)
+
     

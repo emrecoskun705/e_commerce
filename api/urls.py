@@ -10,6 +10,7 @@ from .views import (
     CategoryList,
     CategoryProductList,
     OrderUser,
+    MinimalProduct,
     )
 
 app_name = 'api'
@@ -24,4 +25,5 @@ urlpatterns = [
     path('category-list/', CategoryList.as_view(), name='category-list'),
     path('category-product-list/', CategoryProductList.as_view(), name='category-product-list'),
     path('order-user/', OrderUser.as_view(), name='order-user'),
+    path('minimal-product/', MinimalProduct.as_view(), name='minimal-product'),
 ]
