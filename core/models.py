@@ -70,6 +70,9 @@ class Product(models.Model):
         on_delete=models.CASCADE
     )
 
+    class Meta:
+        ordering = ['-id']
+
     def __str__(self):
         return self.title
 

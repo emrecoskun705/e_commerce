@@ -163,9 +163,9 @@ class CategoryProductList(APIView):
             page = self.paginate_queryset(product_list)
 
             if page is not None:
-                serializer = self.get_paginated_response(MinimalProductSerializer(page,many=True).data)
+                serializer = self.get_paginated_response(MinimalProductSerializer(page,many=True, context={'request': request}).data)
             else:
-                serializer = MinimalProductSerializer(product_list, many=True)
+                serializer = MinimalProductSerializer(product_list, many=True, context={'request': request})
 
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Category.DoesNotExist:
