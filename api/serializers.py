@@ -1,6 +1,12 @@
 from django.db import models
 from rest_framework import fields, serializers
-from core.models import Product, Category
+from core.models import Product, Category, Order
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ('items',)
+        depth = 1
 
 class ProductSerializer(serializers.ModelSerializer):
 

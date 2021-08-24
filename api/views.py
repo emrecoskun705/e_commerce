@@ -19,11 +19,11 @@ from rest_framework import generics
 
 from rest_framework.pagination import PageNumberPagination
 
-from .serializers import CategorySerializer, ProductSerializer, MinimalProductSerializer
+from .serializers import CategorySerializer, ProductSerializer, MinimalProductSerializer, OrderSerializer
 from . filters import ProductFilter, CategoryProductFilter
 from .paginations import SearchProductPagination
 
-from core.models import FavouriteProduct, Product, SpecialProduct, Category
+from core.models import FavouriteProduct, Product, SpecialProduct, Category, Order
 
 # gets all product list (not used in anywhere)
 class ProductList(mixins.ListModelMixin, generics.GenericAPIView):
@@ -195,6 +195,16 @@ class CategoryProductList(APIView):
         assert self.paginator is not None
         return self.paginator.get_paginated_response(data)
             
+class OrderUser(generics.GenericAPIView):
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request, format=None):
+        try:
+            order = Order.objects.get_or_create(user=request.user, is_ordered=False)[0]
+            return Response(OrderSerializer(order).data, status=status.HTTP_200_OK)
+
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 
