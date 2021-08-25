@@ -202,38 +202,35 @@ class MinimalProduct(generics.ListAPIView):
     filterset_class = ProductFilterID
     queryset = Product.objects.all()
 
-# Changes quantity for an OrderProduct
-class ChangeQuantiy(generics.GenericAPIView):
+
+class OrderProductView(APIView):
     authentication_classes = (TokenAuthentication,)
-
     # this serializer is needed because of checking body parameters
-    serializer_class = OrderProductSerializer
-
-    def post(self, request):
-        # if serializer is not valid (parameters are not included), it will raise an error
-        # Example:if id is not included;  'id': This field is required.   error will occur 
-        self.serializer = self.get_serializer(data=self.request.data, context={'request': request})
-        self.serializer.is_valid(raise_exception=True)
     
-        # body parameters
-        order_product_id = int(request.data['id'])
-        quantity = int(request.data['quantity'])
-     
-        # if object does not exist
+    def get_object(self, id):
         try:
-            #only requested user must have that order product
-            orderProduct = OrderProduct.objects.get(id=order_product_id, user=request.user)
+            return OrderProduct.objects.get(id=id, user=self.request.user)
         except OrderProduct.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+    def put(self, request, id, format=None):
+        orderProduct = self.get_object(id)
+        serializer = OrderProductSerializer(orderProduct, data=request.data)
+         # if serializer is not valid (parameters are not included), it will raise an error
+        # Example:if id is not included;  'id': This field is required.   error will occur 
+        if serializer.is_valid(raise_exception=True):
+            quantity = int(request.data['quantity'])
+            # if quantity is greater than stock, user shouldn't be able to buy product which is out of limit.
+            if(quantity > orderProduct.product.stock):
+                return Response({'Stock': orderProduct.product.stock}, status=status.HTTP_400_BAD_REQUEST)
 
-        # if quantity is greater than stock, user shouldn't be able to buy product which is out of limit.
-        if(quantity > orderProduct.product.stock):
-            return Response({'Stock': orderProduct.product.stock}, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            return Response(serializer.data)
 
-        # success part
-        orderProduct.quantity = quantity        
-        orderProduct.save()
+    def delete(self, request, id, format=None):
+        # body parameters
+        
+        orderProduct = self.get_object(id)
+        orderProduct.delete()
 
         return Response(status=status.HTTP_200_OK)
-

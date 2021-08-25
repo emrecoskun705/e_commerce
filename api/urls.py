@@ -11,7 +11,7 @@ from .views import (
     CategoryProductList,
     OrderUser,
     MinimalProduct,
-    ChangeQuantiy,
+    OrderProductView,
     )
 
 app_name = 'api'
@@ -27,5 +27,5 @@ urlpatterns = [
     path('category-product-list/', CategoryProductList.as_view(), name='category-product-list'),
     path('order-user/', OrderUser.as_view(), name='order-user'),
     path('minimal-product/', MinimalProduct.as_view(), name='minimal-product'),
-    path('change-quantity/', ChangeQuantiy.as_view(), name='change-quantity'),
+    path('order-product/<int:id>/', OrderProductView.as_view(), name='order-product'),
 ]
