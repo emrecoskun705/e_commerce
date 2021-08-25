@@ -2,7 +2,7 @@ from django.db.models import fields
 from django_filters import rest_framework as filters
 from django_filters import ModelChoiceFilter
 from mptt.forms import TreeNodeChoiceField
-from core.models import Product
+from core.models import Product, OrderProduct
 
 
 class ProductFilter(filters.FilterSet):
@@ -19,4 +19,10 @@ class ProductFilterID(filters.FilterSet):
         model = Product
         fields = ('id',)
 
+class OrderProductFilterID(filters.FilterSet):
+    id = filters.CharFilter(required=True)
+    
+    class Meta:
+        model = OrderProduct
+        fields = ('id',)
     

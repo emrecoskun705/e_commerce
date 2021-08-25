@@ -1,6 +1,15 @@
 from django.db import models
 from rest_framework import fields, serializers
-from core.models import Product, Category, Order
+from core.models import Product, Category, Order, OrderProduct
+
+# to make a order product POST request
+class OrderProductSerializer(serializers.ModelSerializer):
+    # these parameters are required so user must enter these parameters
+    id = serializers.IntegerField(required=True)
+    quantity = serializers.IntegerField(required=True)
+    class Meta:
+        model = OrderProduct
+        fields = ('id','quantity')
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:

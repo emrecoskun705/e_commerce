@@ -1,8 +1,6 @@
 from django.db.models import fields
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
-from django.views.decorators.csrf import csrf_exempt
-from django_filters.filterset import filterset_factory
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,11 +9,11 @@ from rest_framework import mixins
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import generics
 
-from .serializers import CategorySerializer, ProductSerializer, MinimalProductSerializer, OrderSerializer
-from . filters import ProductFilter, ProductFilterID
+from .serializers import CategorySerializer, ProductSerializer, MinimalProductSerializer, OrderSerializer, OrderProductSerializer
+from . filters import ProductFilter, ProductFilterID, OrderProductFilterID
 from .paginations import SearchProductPagination
 
-from core.models import FavouriteProduct, Product, SpecialProduct, Category, Order
+from core.models import FavouriteProduct, OrderProduct, Product, SpecialProduct, Category, Order
 
 # gets all product list (not used in anywhere)
 class ProductList(mixins.ListModelMixin, generics.GenericAPIView):
@@ -203,6 +201,37 @@ class MinimalProduct(generics.ListAPIView):
     filterset_class = ProductFilterID
     queryset = Product.objects.all()
 
+# Changes quantity for an OrderProduct
+class ChangeQuantiy(generics.GenericAPIView):
+    authentication_classes = (TokenAuthentication,)
+
+    # this serializer is needed because of checking body parameters
+    serializer_class = OrderProductSerializer
+
+    def post(self, request):
+        # if serializer is not valid (parameters are not included), it will raise an error
+        # Example:if id is not included;  'id': This field is required.   error will occur 
+        self.serializer = self.get_serializer(data=self.request.data, context={'request': request})
+        self.serializer.is_valid(raise_exception=True)
+    
+        # body parameters
+        order_product_id = int(request.data['id'])
+        quantity = int(request.data['quantity'])
+     
+        # if object does not exist
+        try:
+            orderProduct = OrderProduct.objects.get(id=order_product_id)
+        except OrderProduct.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
+        # if quantity is greater than stock, user shouldn't be able to buy product which is out of limit.
+        if(quantity > orderProduct.product.stock):
+            return Response({'Stock': orderProduct.product.stock}, status=status.HTTP_400_BAD_REQUEST)
+
+        # success part
+        orderProduct.quantity = quantity        
+        orderProduct.save()
+
+        return Response(status=status.HTTP_200_OK)
     
