@@ -3,12 +3,14 @@ from rest_framework import fields, serializers
 from core.models import Product, Category, Order, OrderProduct
 
 # to make a order product POST request
-class OrderProductSerializer(serializers.ModelSerializer):
+class OrderProductQuantitySerializer(serializers.ModelSerializer):
     # these parameters are required so user must enter these parameters
     quantity = serializers.IntegerField(required=True)
     class Meta:
         model = OrderProduct
         fields = ('quantity',)
+
+
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:

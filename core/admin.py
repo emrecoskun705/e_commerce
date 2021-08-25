@@ -29,6 +29,10 @@ from .models import (
 class ProductImageAdmin(admin.StackedInline):
     model = ProductImage
 
+@admin.register(OrderProduct)
+class OrderProductAdmin(admin.ModelAdmin):
+    readonly_fields = ('id',)
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductImageAdmin]
@@ -41,9 +45,6 @@ admin.site.register(ProductImage)
 
 """ CATEGORY """
 admin.site.register(Category, MPTTModelAdmin)
-
-admin.site.register(OrderProduct)
-
 
 admin.site.register(Address)
 

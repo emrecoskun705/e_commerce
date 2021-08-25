@@ -8,9 +8,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import mixins
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 
-from .serializers import CategorySerializer, ProductSerializer, MinimalProductSerializer, OrderSerializer, OrderProductSerializer
+from .serializers import CategorySerializer, OrderProductQuantitySerializer, ProductSerializer, MinimalProductSerializer, OrderSerializer
 from . filters import ProductFilter, ProductFilterID, OrderProductFilterID
 from .paginations import SearchProductPagination
 
@@ -48,6 +49,7 @@ class ProductDetail(generics.GenericAPIView):
 
 class UserFavouriteProduct(generics.GenericAPIView):
     authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
     # if product id in facourite product list for that user response 200, or 404, 400
     def get(self, request, format=None):
         try:
@@ -61,7 +63,7 @@ class UserFavouriteProduct(generics.GenericAPIView):
 
 class UserFavouriteProductList(generics.GenericAPIView):
     authentication_classes = (TokenAuthentication,)
-
+    permission_classes = (IsAuthenticated,)
     # gets(response) the favourite products for requested user 
     def get(self, request, format=None):
         product_list = FavouriteProduct.objects.get(user=request.user).products.all()
@@ -188,6 +190,7 @@ class CategoryProductList(APIView):
             
 class OrderUser(generics.GenericAPIView):
     authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, format=None):
         try:
@@ -203,19 +206,24 @@ class MinimalProduct(generics.ListAPIView):
     queryset = Product.objects.all()
 
 
-class OrderProductView(APIView):
+class OrderProductView(generics.GenericAPIView):
     authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
     # this serializer is needed because of checking body parameters
     
     def get_object(self, id):
         try:
-            return OrderProduct.objects.get(id=id, user=self.request.user)
+            return (OrderProduct.objects.get(id=id, user=self.request.user), False)
         except OrderProduct.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return (Response(status=status.HTTP_404_NOT_FOUND), True)
 
     def put(self, request, id, format=None):
-        orderProduct = self.get_object(id)
-        serializer = OrderProductSerializer(orderProduct, data=request.data)
+        orderProduct, error = self.get_object(id)
+        if error:
+            return orderProduct
+
+
+        serializer = OrderProductQuantitySerializer(orderProduct, data=request.data)
          # if serializer is not valid (parameters are not included), it will raise an error
         # Example:if id is not included;  'id': This field is required.   error will occur 
         if serializer.is_valid(raise_exception=True):
@@ -230,7 +238,32 @@ class OrderProductView(APIView):
     def delete(self, request, id, format=None):
         # body parameters
         
-        orderProduct = self.get_object(id)
+        orderProduct, error = self.get_object(id)
+        if error:
+            return orderProduct
+
         orderProduct.delete()
 
         return Response(status=status.HTTP_200_OK)
+
+    def post(self, request, format=None):
+        productId = request.data.get('productId')
+        if(productId == None):
+            return Response({'productId': 'This field is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        product = get_object_or_404(Product, id=productId)
+        
+        # get active order for a user
+        order = Order.objects.get(user=request.user, is_ordered=False)
+
+        # if product in orderProduct list, no need to add it again because it already exists
+        if product in [orderProduct.product for orderProduct in order.items.all()]:
+            return Response({'Exist': 'Product already in order'}, status=status.HTTP_400_BAD_REQUEST)
+
+        #create order product
+        orderProduct = OrderProduct.objects.create(user=request.user, product=product, quantity=1)
+        # add orderproduct to order
+        order.items.add(orderProduct)
+        order.save()
+
+        return Response({'id': orderProduct.id}, status=status.HTTP_201_CREATED)
