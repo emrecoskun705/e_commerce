@@ -1,6 +1,7 @@
 from django.db.models import fields
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -220,7 +221,8 @@ class ChangeQuantiy(generics.GenericAPIView):
      
         # if object does not exist
         try:
-            orderProduct = OrderProduct.objects.get(id=order_product_id)
+            #only requested user must have that order product
+            orderProduct = OrderProduct.objects.get(id=order_product_id, user=request.user)
         except OrderProduct.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -234,4 +236,4 @@ class ChangeQuantiy(generics.GenericAPIView):
         orderProduct.save()
 
         return Response(status=status.HTTP_200_OK)
-    
+
