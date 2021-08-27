@@ -133,8 +133,8 @@ def add_to_cart(request, slug):
             return redirect('core:cart')
     else:
         #if order isn' exists
-        date = timezone.now()
-        new_order = Order.objects.create(user=request.user, order_date=date)
+        
+        new_order = Order.objects.create(user=request.user)
         new_order.items.add(order_product)
         messages.info(request, 'Product was added to your cart')
         return redirect('core:cart')
@@ -485,7 +485,7 @@ class CancelView(TemplateView):
 def stripe_webhook(request):
     '''
         This part will activate when user submits the payment in stripe website
-        Strip webhook must be working for cathing requests!!!!
+        Strip webhook must be working for catching requests!!!!
     '''
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']

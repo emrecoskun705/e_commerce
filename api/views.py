@@ -266,7 +266,9 @@ class OrderProductView(generics.GenericAPIView):
         product = get_object_or_404(Product, id=productId)
         
         # get active order for a user
-        order = Order.objects.get(user=request.user, is_ordered=False)
+        # if order does not exist create an order
+        order, created = Order.objects.get_or_create(user=request.user, is_ordered=False)
+        
 
         # if product in orderProduct list, no need to add it again because it already exists
         if product in [orderProduct.product for orderProduct in order.items.all()]:
@@ -298,6 +300,33 @@ class AddressView(generics.GenericAPIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save(user=request.user)
             return Response(status=status.HTTP_201_CREATED)
+
+    # add address to order
+    def put(self, request, format=None):
+        address_id = request.data.get('id')
+        if address_id is None:
+            return Response({'id': 'This field is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        address_id = int(address_id)
+
+        # get address of requested user
+        address = get_object_or_404(Address, id=address_id, user=request.user)
+
+        # get order otherwise create
+        order, created = Order.objects.get_or_create(user=request.user, is_ordered=False)
+
+        # add address to order shipping and billing address
+        # billing and shipping address might be different but I'm gonna leave it like this
+        # because this is only for learning purpose
+        order.billing_address = address
+        order.shipping_address = address
+
+        #save changes
+        order.save()
+
+        return Response(status=status.HTTP_200_OK)
+
+
 
 
 class Stripe(generics.GenericAPIView):
