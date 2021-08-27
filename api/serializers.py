@@ -1,6 +1,17 @@
 from django.db import models
 from rest_framework import fields, serializers
-from core.models import Product, Category, Order, OrderProduct
+from core.models import Product, Category, Order, OrderProduct, Address
+
+
+class StripeSerializer(serializers.Serializer):
+    url = serializers.CharField()
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        exclude = ('user',)
+    
+
 
 # to make a order product POST request
 class OrderProductQuantitySerializer(serializers.ModelSerializer):

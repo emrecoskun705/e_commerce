@@ -364,6 +364,9 @@ class CheckoutView(LoginRequiredMixin, View):
                         },
                         'quantity': order_item.quantity,
                     })
+
+            print(line_items)
+
             discounts = []
             if order.coupon:
                 discounts.append({

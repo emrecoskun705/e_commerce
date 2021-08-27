@@ -3,6 +3,7 @@ from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework import response
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -11,11 +12,22 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 
-from .serializers import CategorySerializer, OrderProductQuantitySerializer, ProductSerializer, MinimalProductSerializer, OrderSerializer
+from .serializers import (
+    CategorySerializer, 
+    OrderProductQuantitySerializer, 
+    ProductSerializer, 
+    MinimalProductSerializer, 
+    OrderSerializer,
+    AddressSerializer,
+    StripeSerializer,
+    )
 from . filters import ProductFilter, ProductFilterID, OrderProductFilterID
 from .paginations import SearchProductPagination
 
-from core.models import FavouriteProduct, OrderProduct, Product, SpecialProduct, Category, Order
+from core.models import Address, FavouriteProduct, OrderProduct, Product, SpecialProduct, Category, Order
+
+import stripe
+
 
 # gets all product list (not used in anywhere)
 class ProductList(mixins.ListModelMixin, generics.GenericAPIView):
@@ -267,3 +279,77 @@ class OrderProductView(generics.GenericAPIView):
         order.save()
 
         return Response({'id': orderProduct.id}, status=status.HTTP_201_CREATED)
+
+
+class AddressView(generics.GenericAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+
+    # gets the address of requested user
+    def get(self, request, format=None):
+        addresses = Address.objects.filter(user=request.user)
+        return Response(AddressSerializer(addresses, many=True).data, status=status.HTTP_200_OK)
+
+    # creates a new address for a user
+    def post(self, request, format=None):
+        serializer = AddressSerializer(data=request.data)
+
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(user=request.user)
+            return Response(status=status.HTTP_201_CREATED)
+
+
+class Stripe(generics.GenericAPIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    # it creates a stripe checkout session and returns a response which has url as a parameter.
+    # this url redirects user to stripe checkout form (payment form) fro given orderProducts(line_items)
+    def get(self, request, format=None):
+        order = get_object_or_404(Order, user=request.user, is_ordered=False)
+        line_items = []
+        for orderProduct in order.items.all():
+            
+            line_items.append(
+                {
+                    'price_data': {
+                        'currency': 'usd',
+                            'unit_amount': int(orderProduct.product.price * 100),
+                            'product_data': {
+                                'name': orderProduct.product.title,
+                                
+                            },
+                        },
+                        'quantity': orderProduct.quantity,
+                }
+            )
+
+        discounts = []
+        if order.coupon:
+            discounts.append({
+                'coupon': order.coupon.key
+            })
+
+        # server IP address
+        YOUR_DOMAIN = "http://192.168.0.108:8000/api"
+
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=line_items,
+            metadata={
+                'order_pk': order.pk,
+                'user_pk': self.request.user.id
+            },
+            mode='payment',
+            discounts=discounts,
+            success_url=YOUR_DOMAIN + '/stripe/success/',
+            cancel_url=YOUR_DOMAIN + '/stripe/cancel/',
+        )
+
+        return Response(StripeSerializer(checkout_session).data, status=status.HTTP_200_OK)
+
+        
+
+        
+

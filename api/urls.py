@@ -12,6 +12,8 @@ from .views import (
     OrderUser,
     MinimalProduct,
     OrderProductView,
+    Stripe,
+    AddressView,
     )
 
 app_name = 'api'
@@ -29,4 +31,6 @@ urlpatterns = [
     path('minimal-product/', MinimalProduct.as_view(), name='minimal-product'),
     path('order-product/', OrderProductView.as_view(), name='order-products'),
     path('order-product/<int:id>/', OrderProductView.as_view(), name='order-product'),
+    path('stripe/', Stripe.as_view(), name='stripe'),
+    path('address/', AddressView.as_view(), name='address'),
 ]
