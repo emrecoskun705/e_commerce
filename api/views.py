@@ -79,18 +79,9 @@ class UserFavouriteProductList(generics.GenericAPIView):
     # gets(response) the favourite products for requested user 
     def get(self, request, format=None):
         product_list = FavouriteProduct.objects.get(user=request.user).products.all()
-        
         # if product id is given return response
-        try:
-            # this query parameter is optional, for only getting the specific product is in that favaourite product list
-            productId = int(request.query_params['productId'])
-            if productId in [product.id for product in product_list]:
-                return Response(status=status.HTTP_200_OK)
-            else:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-        except:
             # return list of favourite product
-            return Response(ProductSerializer(product_list, many=True).data)
+        return Response(MinimalProductSerializer(product_list, many=True, context={'request': request}).data, status=status.HTTP_200_OK)
 
     # add product to favouriteProductlist or removes from favouriteProductlist
     # post method parameters are = ['id', 'action']

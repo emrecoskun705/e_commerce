@@ -105,7 +105,7 @@
               </a>
               <h5>
                 <strong>
-                  <a href="{{ item.get_absolute_url }}" class="dark-grey-text">{{ item.title }}
+                  <a href="{{ item.get_absolute_url }}" class="dark-grey-text">{{ item.title|truncatechars:30 }}
                     <span class="badge badge-pill danger-color">NEW</span>
                   </a>
                 </strong>
