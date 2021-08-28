@@ -299,7 +299,7 @@ class AddressView(generics.GenericAPIView):
 
         if serializer.is_valid(raise_exception=True):
             serializer.save(user=request.user)
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(serializer.data ,status=status.HTTP_201_CREATED)
 
     # add address to order
     def put(self, request, format=None):
