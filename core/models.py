@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Q, CheckConstraint
 from django.db.models.aggregates import Min
+from django.db.models.fields.files import ImageField
 from django.db.models.fields.related import ForeignKey, ManyToManyField, OneToOneField
 from django.db.models.signals import post_save
 from django.http import request
@@ -221,6 +222,9 @@ class Order(models.Model):
         if self.coupon:
             return sum -  (sum * (self.coupon.amount/100))
         return sum
+
+class MobileCarousel(models.Model):
+    image = models.ImageField(upload_to='images/')
 
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

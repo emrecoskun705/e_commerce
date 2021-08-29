@@ -1,6 +1,6 @@
 from django.db import models
 from rest_framework import fields, serializers
-from core.models import Product, Category, Order, OrderProduct, Address, Payment
+from core.models import Product, Category, Order, OrderProduct, Address, Payment, MobileCarousel
 
 
 class StripeSerializer(serializers.Serializer):
@@ -21,6 +21,18 @@ class OrderProductQuantitySerializer(serializers.ModelSerializer):
         model = OrderProduct
         fields = ('quantity',)
 
+
+class MobileCarouselSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MobileCarousel
+        fields = ('image',)
+    #get full path
+    def get_image(self, product):
+        request = self.context.get('request')
+        image = product.image.url
+        return request.build_absolute_uri(image)
 
 class MinimalProductSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()

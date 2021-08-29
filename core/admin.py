@@ -23,6 +23,7 @@ from .models import (
     ProductRate,
     SpecialProduct,
     FavouriteProduct,
+    MobileCarousel,
 )
 
 
@@ -55,6 +56,8 @@ admin.site.register(UserProfile)
 admin.site.register(Refund)
 
 admin.site.register(Coupon)
+
+admin.site.register(MobileCarousel)
 
 
 admin.site.register(FavouriteProduct)

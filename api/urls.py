@@ -15,6 +15,7 @@ from .views import (
     Stripe,
     AddressView,
     OrderListUser,
+    MobileCarouselList,
     )
 
 app_name = 'api'
@@ -35,4 +36,5 @@ urlpatterns = [
     path('order-product/<int:id>/', OrderProductView.as_view(), name='order-product'),
     path('stripe/', Stripe.as_view(), name='stripe'),
     path('address/', AddressView.as_view(), name='address'),
+    path('carousel/', MobileCarouselList.as_view(), name='carousel'),
 ]

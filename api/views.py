@@ -21,11 +21,12 @@ from .serializers import (
     AddressSerializer,
     StripeSerializer,
     OrderListSerializer,
+    MobileCarouselSerializer,
     )
 from . filters import ProductFilter, ProductFilterID, OrderProductFilterID
 from .paginations import SearchProductPagination
 
-from core.models import Address, FavouriteProduct, OrderProduct, Product, SpecialProduct, Category, Order
+from core.models import Address, FavouriteProduct, OrderProduct, Product, SpecialProduct, Category, Order, MobileCarousel
 
 import stripe
 
@@ -34,6 +35,16 @@ import stripe
 class ProductList(mixins.ListModelMixin, generics.GenericAPIView):
     queryset =  Product.objects.all()
     serializer_class = ProductSerializer
+
+    def get(self, requset, *args, **kwargs):
+        return self.list(requset, *args, **kwargs)
+
+'''
+Mobile carousel for advertisment at home screen
+'''
+class MobileCarouselList(mixins.ListModelMixin, generics.GenericAPIView):
+    queryset = MobileCarousel.objects.all()
+    serializer_class = MobileCarouselSerializer
 
     def get(self, requset, *args, **kwargs):
         return self.list(requset, *args, **kwargs)
