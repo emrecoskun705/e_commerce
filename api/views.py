@@ -20,6 +20,7 @@ from .serializers import (
     OrderSerializer,
     AddressSerializer,
     StripeSerializer,
+    OrderListSerializer,
     )
 from . filters import ProductFilter, ProductFilterID, OrderProductFilterID
 from .paginations import SearchProductPagination
@@ -202,6 +203,16 @@ class OrderUser(generics.GenericAPIView):
 
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+# lists the all orders for requested user
+class OrderListUser(generics.ListAPIView):
+    authentication_classes =  (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = OrderListSerializer
+    queryset = Order.objects.all()
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
 
 class MinimalProduct(generics.ListAPIView):
     serializer_class = MinimalProductSerializer

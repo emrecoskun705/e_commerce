@@ -1,6 +1,6 @@
 from django.db import models
 from rest_framework import fields, serializers
-from core.models import Product, Category, Order, OrderProduct, Address
+from core.models import Product, Category, Order, OrderProduct, Address, Payment
 
 
 class StripeSerializer(serializers.Serializer):
@@ -21,6 +21,44 @@ class OrderProductQuantitySerializer(serializers.ModelSerializer):
         model = OrderProduct
         fields = ('quantity',)
 
+
+class MinimalProductSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'title',
+            'price',
+            'discount_price',
+            'image',
+        ]
+
+    #get full path
+    def get_image(self, product):
+        request = self.context.get('request')
+        image = product.image.url
+        return request.build_absolute_uri(image)
+
+class OrderProductSerializer(serializers.ModelSerializer):
+    product = MinimalProductSerializer()
+
+    class Meta:
+        model = OrderProduct
+        fields = '__all__'
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ('amount',)
+
+class OrderListSerializer(serializers.ModelSerializer):
+    payment = PaymentSerializer()
+    items = OrderProductSerializer(many=True)
+    class Meta:
+        model = Order
+        exclude = ('user', 'timestamp', 'is_ordered', 'shipping_address', 'billing_address')
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -46,29 +84,6 @@ class ProductSerializer(serializers.ModelSerializer):
         # when we use depth = 1, now we can reach the fields of images(ImageProduct object)
         depth = 1
 
-
-
-
-    
-
-class MinimalProductSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Product
-        fields = [
-            'id',
-            'title',
-            'price',
-            'discount_price',
-            'image',
-        ]
-
-    #get full path
-    def get_image(self, product):
-        request = self.context.get('request')
-        image = product.image.url
-        return request.build_absolute_uri(image)
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
