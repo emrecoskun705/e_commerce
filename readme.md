@@ -13,7 +13,6 @@ Simple django e-commertce website
 
 ## Tech
 
-Dillinger uses a number of open source projects to work properly:
 
 - [Python] - backend handling
 - [Django] - using Django version 2.2
