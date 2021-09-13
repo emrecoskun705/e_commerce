@@ -51,8 +51,11 @@ class MobileCarouselList(mixins.ListModelMixin, generics.GenericAPIView):
 
 # gets the all trend products
 class TrendProductList(mixins.ListModelMixin, generics.GenericAPIView):
-    queryset = SpecialProduct.objects.filter(title='trend')[0].products.all()
     serializer_class = MinimalProductSerializer
+
+    def get_queryset(self):
+        special_product = get_object_or_404(SpecialProduct, title='trend')
+        return special_product.products.all()
 
     def get(self, requset, *args, **kwargs):
         return self.list(requset, *args, **kwargs)
