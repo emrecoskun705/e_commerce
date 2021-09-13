@@ -140,4 +140,4 @@ cython_debug/
 static_root
 media_root
 
-media
+media/
