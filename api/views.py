@@ -226,7 +226,7 @@ class OrderListUser(generics.ListAPIView):
     queryset = Order.objects.all()
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
+        return Order.objects.filter(user=self.request.user, is_ordered=True)
 
 class MinimalProduct(generics.ListAPIView):
     serializer_class = MinimalProductSerializer
