@@ -4,6 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework import response
+from rest_framework import authentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -77,10 +78,10 @@ class ProductDetail(generics.GenericAPIView):
 class UserFavouriteProduct(generics.GenericAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+    
     # if product id in facourite product list for that user response 200, or 404, 400
-    def get(self, request, format=None):
+    def get(self, request, productId, format=None):
         try:
-            productId = int(request.query_params['productId'])
             if(productId in [product.id for product in FavouriteProduct.objects.get(user=request.user).products.all()]):
                 return Response(status=status.HTTP_200_OK)
             else:
