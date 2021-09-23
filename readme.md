@@ -3,7 +3,7 @@ https://user-images.githubusercontent.com/57330864/127233277-4d24491b-aec0-4d94-
 
 # Django E-Commerce
 
-Simple django e-commertce website
+Simple django e-commertce website. Test website https://emrecoskun.xyz/
 
 - Python 3.7.6
 - virtualenv
