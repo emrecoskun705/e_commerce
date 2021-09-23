@@ -16,6 +16,8 @@ Simple django e-commertce website. Test website https://emrecoskun.xyz/
 
 - [Python] - backend handling
 - [Django] - using Django version 2.2
+- [Stripe] - Stripe for payment
+- [Google API] - Google OAuth 2.0
 - [Template] - MDBootstrap free e-commerce template.
 
 
@@ -79,4 +81,6 @@ stripe listen --forward-to localhost:8000/webhooks/stripe/
    [Django]: https://www.djangoproject.com/download/
    [Template]: https://mdbootstrap.com/freebies/jquery/e-commerce/
    [Stripe CLI]: https://stripe.com/docs/stripe-cli#install
+   [Stripe]: https://stripe.com/
+   [Google API]: https://developers.google.com/identity/protocols/oauth2
   
